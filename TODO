@@ -1,0 +1,8 @@
+TODO:
+
+* drop audio drivers and use out123
+* support unicode filenames on Windows (depends on libsidplayfp)
+* add playlist support (pls)
+* make the extra filter viewers available only for verbosity levels > 2
+
+* fix building on Cygwin

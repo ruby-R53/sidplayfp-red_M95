@@ -1,0 +1,60 @@
+"sidplayfp
+=========
+
+https://github.com/libsidplayfp/sidplayfp
+
+sidplayfp is a console C64 music player which uses the libsidplayfp engine
+to provide the best SID listening experience.
+
+Copyright (c) 2000 Simon White
+Copyright (c) 2007-2010 Antti Lankila
+Copyright (c) 2010-2023 Leandro Nini <drfiemost@users.sourceforge.net>
+
+
+
+Documentation
+-------------
+https://github.com/libsidplayfp/sidplayfp/wiki
+
+
+
+NOTE:
+-----
+ROM dumps are not embedded but must be supplied by the user.
+The ROMs are optional and most tunes should work fine without
+but compatibility is not guaranteed.
+Check the sidplayfp.ini documentation for configuration details
+and default search paths.
+
+
+
+stilview
+========
+
+STILView is a command-line driven program to help you retrieve
+the entries stored in STIL fast and accurately.
+
+Copyright (c) 1998, 2002 by LaLa
+Copyright (c) 2013-2017 Leandro Nini <drfiemost@users.sourceforge.net>
+
+
+
+-----------------------------------------------------------------------------
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+-----------------------------------------------------------------------------"
+this is my fork of sidplayfp, it adds a master volume meter in binary that might partially help visualizing digi samples, a filter viewer, and a channel filter viewer, to see which channels are being filtered, and also a filter resonance meter.
+i plan on making those visible for whoever sets the verbosity level to > 2, rather than leaving it for the original > 1 level.
