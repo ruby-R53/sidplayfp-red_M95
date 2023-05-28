@@ -467,7 +467,7 @@ void ConsolePlayer::menu () {
         consoleTable (tableSeparator);
         consoleTable (tableMiddle);
 	cerr << "          Note  PW         Control          Waveform(s)" << endl;
-        for (int i=0; i < tuneInfo->sidChips() * 6 + 2; i++) { // reserve space for each voice status
+        for (int i=0; i < tuneInfo->sidChips() * 6 + 0; i++) { // reserve space for each voice status
             consoleTable (tableMiddle); cerr << endl;
 	}
     }
@@ -491,7 +491,7 @@ void ConsolePlayer::refreshRegDump() {
     if (m_verboseLevel = 2) {
         const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
-        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 3 << "A\r"; // Moves cursor X lines up
+        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor X lines up
 
         for (int j=0; j < tuneInfo->sidChips(); j++) {
             uint8_t* registers = m_registers[j];
@@ -631,7 +631,6 @@ void ConsolePlayer::refreshRegDump() {
 		    cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
 
 		cerr << dec << endl;
-		consoleTable (tableEnd);
 	    }
             else {
 		for (int i=0; i < 3; i++) {
@@ -639,7 +638,7 @@ void ConsolePlayer::refreshRegDump() {
 		}
             }
 	}
-        //consoleTable (tableEnd);
+        consoleTable (tableEnd);
     }
     else
 #endif
