@@ -488,7 +488,7 @@ void ConsolePlayer::menu () {
 
 void ConsolePlayer::refreshRegDump() {
 #ifdef FEAT_REGS_DUMP_SID
-    if (m_verboseLevel = 2) {
+    if (m_verboseLevel > 1) {
         const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
         cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor X lines up
