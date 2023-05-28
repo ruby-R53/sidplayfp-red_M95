@@ -69,7 +69,6 @@ inline void error(const TCHAR *msg, const TCHAR *val)
 const TCHAR *DIR_NAME = TEXT("sidplayfp");
 const TCHAR *FILE_NAME = TEXT("sidplayfp.ini");
 
-
 IniConfig::IniConfig()
 {   // Initialise everything else
     clear();
@@ -84,9 +83,9 @@ IniConfig::~IniConfig()
 
 void IniConfig::clear()
 {
-    sidplay2_s.version      = 1;           // INI File Version
+    sidplay2_s.version      = 1;                    // INI File Version
     sidplay2_s.database.clear();
-    sidplay2_s.playLength   = 0;           // INFINITE
+    sidplay2_s.playLength   = 0;                    // INFINITE
     sidplay2_s.recordLength = (3 * 60 + 30) * 1000; // 3.5 minutes
     sidplay2_s.kernalRom.clear();
     sidplay2_s.basicRom.clear();
@@ -120,11 +119,10 @@ void IniConfig::clear()
     emulation_s.bias            = 0.5;
     emulation_s.filterCurve6581 = 0.5;
     emulation_s.filterCurve8580 = 0.5;
-    emulation_s.powerOnDelay = -1;
-    emulation_s.samplingMethod = SidConfig::RESAMPLE_INTERPOLATE;
-    emulation_s.fastSampling = false;
+    emulation_s.powerOnDelay    = -1;
+    emulation_s.samplingMethod  = SidConfig::RESAMPLE_INTERPOLATE;
+    emulation_s.fastSampling    = false;
 }
-
 
 // static helpers
 

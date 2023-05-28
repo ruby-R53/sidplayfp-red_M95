@@ -94,6 +94,7 @@ static char keytable[] =
     // General Keys
     'p',0,                     A_PAUSED,
     ESC,ESC,0,                 A_QUIT,
+    'q',0,                     A_QUIT,
 
     // Old Keys
     '>',0,                     A_RIGHT_ARROW,
