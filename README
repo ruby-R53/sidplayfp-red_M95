@@ -1,3 +1,24 @@
+this is my fork of sidplayfp that provides some extra features, like a detailed filter view. i plan on adding more features over time, but nothing really ambitious for now.
+
+changes made so far:
+-master volume meter:
+ -shows the master volume, in binary. it can also be used to see digi samples being played.
+
+-filter viewers:
+ -low pass (lp), band pass (bp), high pass (hp), and voice 3 off (3o). when switched on, their names get capitalized.
+ -filtered channels: shows which channels are being filtered.
+ -filter resonance: shows the filter resonance, in binary. ranges from no resonance, %0000, to max. resonance, %1111.
+ -filter cutoff: shows the filter cutoff frequency, in binary as well. approximately ranges from 30 hz - 10 khz, using an 11-bit counter.
+
+-showing some essential keybinds during playback:
+ -during playback, the original sidplayfp just displays "Playing, press ESC to stop...(elapsed time)". so, i decided to make it show which keys are used for going to the previous tune, pause, going to next tune, and stop (obviously). this makes it a bit easier to figure out how to use it.
+
+-changes on the keybinds:
+ -nothing really interesting, now you can use either the esc or the 'q' key to stop playing. i decided to add the 'q' key 'cos lazy hands like mine wouldn't have to move to such a distant place. yeah, i know what you're thinking.
+
+-current plans:
+ -none. i might suddenly come up with one without even mentioning, though.
+
 "sidplayfp
 =========
 
@@ -56,5 +77,3 @@ Copyright (c) 2013-2017 Leandro Nini <drfiemost@users.sourceforge.net>
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 -----------------------------------------------------------------------------"
-this is my fork of sidplayfp, it adds a master volume meter in binary that might partially help visualizing digi samples, a filter viewer, and a channel filter viewer, to see which channels are being filtered, and also a filter resonance meter.
-i plan on making those visible for whoever sets the verbosity level to > 2, rather than leaving it for the original > 1 level.

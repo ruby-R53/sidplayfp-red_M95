@@ -1,4 +1,7 @@
-sidplayfp is a console C64 music player which uses the libsidplayfp engine
+this fork is currently being developed by red M95.
+however, i'd like to thank frozen, a mate from discord, for helping me fix some mistakes. i'm still quite a newbie to c++ xd
+
+"sidplayfp is a console C64 music player which uses the libsidplayfp engine
 to provide the best SID listening experience.
 
 Copyright (c) 2000 Simon White
@@ -35,5 +38,4 @@ Credit where credit is due, so if I missed anyone please let me know.
 
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA"
