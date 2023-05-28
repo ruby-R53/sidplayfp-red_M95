@@ -560,83 +560,87 @@ void ConsolePlayer::refreshRegDump() {
 		   
                     cerr << dec << endl;
                 }
-		consoleTable (tableSeparator);
-	        consoleTable (tableMiddle);
-                cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
-                consoleTable (tableMiddle);
-
-                // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
-	        consoleColour(red, true);
-	        cerr << "          %";
-	        for (int c=0; c < 4; c++) {
-	            uint8_t bitCnt[4];
-	            	    bitCnt[0] = 0x08;
-	               	    bitCnt[1] = 0x04;
-    			    bitCnt[2] = 0x02;
-	                    bitCnt[3] = 0x01;
-
-	            cerr << ((registers[0x18] & bitCnt[c]) ? "1" : "0");
-	        }
-
-            	// low pass on ?
-	    	cerr << ((registers[0x18] & 0x10) ? "  LP" : "  lp");
-
-	        // band pass on ?
-		cerr << ((registers[0x18] & 0x20) ? " BP" : " bp");
-
-	    	// high pass on ?
-            	cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
-
-	    	// voice 3 off on ?
-            	cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
-
-		for (int c=0; c < 3; c++) {
-		    uint8_t bitCnt[3];
-		            bitCnt[0] = 0x01;
-		            bitCnt[1] = 0x02;
-			    bitCnt[2] = 0x04;
-
-                    const char *voice[] = {"1","2","3",};
-	            cerr << ((registers[0x17] & bitCnt[c]) ? voice[c] : "-");
-		}
-
-                // filter resonance, if filter's present, of course
-	        cerr << "    %";
-	        for (int c=0; c < 4; c++) {
-                    uint8_t bitCnt[4];
-		            bitCnt[0] = 0x80;
-	              	    bitCnt[1] = 0x40;
-    			    bitCnt[2] = 0x20;
-	               	    bitCnt[3] = 0x10;
-
-                    cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
-		}
-		cerr << "  %";
-	        int bitCnt[11];
-	            bitCnt[0]  = 0x400;
-	            bitCnt[1]  = 0x200;
-    	  	    bitCnt[2]  = 0x100;
-	            bitCnt[3]  = 0x080;
-		    bitCnt[4]  = 0x040;
-		    bitCnt[5]  = 0x020;
-		    bitCnt[6]  = 0x010;
-		    bitCnt[7]  = 0x008;
-	            bitCnt[8]  = 0x004;
-		    bitCnt[9]  = 0x002;
-		    bitCnt[10] = 0x001;
-
-	        for (int c=0; c < 2; c++)
-		    cerr << ((registers[0x15] & bitCnt[c]) ? "1" : "0");
-		for (int c=2; c < 11; c++)
-		    cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
-
-		cerr << dec << endl;
 	    }
             else {
 		for (int i=0; i < 3; i++) {
                     consoleTable (tableMiddle); cerr << "???" << endl;
 		}
             }
+	}
+        for (int j=0; j < tuneInfo->sidChips(); j++) {
+            uint8_t* registers = m_registers[j];
+
+	    consoleTable (tableSeparator);
+	    consoleTable (tableMiddle);
+            cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
+            consoleTable (tableMiddle);
+
+            // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
+	    consoleColour(red, true);
+	    cerr << "          %";
+	    for (int c=0; c < 4; c++) {
+	        uint8_t bitCnt[4];
+	                bitCnt[0] = 0x08;
+	              	bitCnt[1] = 0x04;
+    			bitCnt[2] = 0x02;
+	                bitCnt[3] = 0x01;
+
+	        cerr << ((registers[0x18] & bitCnt[c]) ? "1" : "0");
+	    }
+
+            // low pass on ?
+	    cerr << ((registers[0x18] & 0x10) ? "  LP" : "  lp");
+
+	    // band pass on ?
+	    cerr << ((registers[0x18] & 0x20) ? " BP" : " bp");
+
+	    // high pass on ?
+            cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
+
+	    // voice 3 off on ?
+            cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
+
+	    for (int c=0; c < 3; c++) {
+		uint8_t bitCnt[3];
+		        bitCnt[0] = 0x01;
+		        bitCnt[1] = 0x02;
+		        bitCnt[2] = 0x04;
+
+                const char *voice[] = {"1","2","3",};
+	        cerr << ((registers[0x17] & bitCnt[c]) ? voice[c] : "-");
+	    }
+
+            // filter resonance, if filter's present, of course
+	    cerr << "    %";
+	    for (int c=0; c < 4; c++) {
+                uint8_t bitCnt[4];
+	                bitCnt[0] = 0x80;
+	          	bitCnt[1] = 0x40;
+    			bitCnt[2] = 0x20;
+	               	bitCnt[3] = 0x10;
+
+                cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
+	    }
+	    cerr << "  %";
+	    int bitCnt[11];
+	        bitCnt[0]  = 0x400;
+	        bitCnt[1]  = 0x200;
+    	        bitCnt[2]  = 0x100;
+	        bitCnt[3]  = 0x080;
+	        bitCnt[4]  = 0x040;
+		bitCnt[5]  = 0x020;
+		bitCnt[6]  = 0x010;
+		bitCnt[7]  = 0x008;
+	        bitCnt[8]  = 0x004;
+		bitCnt[9]  = 0x002;
+		bitCnt[10] = 0x001;
+
+	    for (int c=0; c < 2; c++)
+	        cerr << ((registers[0x15] & bitCnt[c]) ? "1" : "0");
+	    for (int c=2; c < 11; c++)
+		cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
+
+	    cerr << dec << endl;
 	}
         consoleTable (tableEnd);
     }
