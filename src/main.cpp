@@ -121,20 +121,20 @@ void displayError (const char *arg0, unsigned int num)
     switch (num)
     {
     case ERR_SYNTAX:
-        cerr << "command line syntax error" << endl
-             << "Try `" << arg0 << " --help' for more information." << endl;
+        cerr << "Command line syntax error," << endl
+             << "try `" << arg0 << " --help' for more information." << endl;
         break;
 
     case ERR_NOT_ENOUGH_MEMORY:
-        cerr << "ERROR: Not enough memory." << endl;
+        cerr << "ERROR: not enough memory." << endl;
         break;
 
     case ERR_SIGHANDLER:
-        cerr << "ERROR: Could not install signal handler." << endl;
+        cerr << "ERROR: could not install signal handler." << endl;
         break;
 
     case ERR_FILE_OPEN:
-        cerr << "ERROR: Could not open file for binary input." << endl;
+        cerr << "ERROR: could not open file for binary input." << endl;
         break;
 
     default: break;

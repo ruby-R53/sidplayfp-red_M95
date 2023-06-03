@@ -1,6 +1,6 @@
 this is my fork of sidplayfp that provides some extra features, like a detailed filter view. i plan on adding more features over time, but nothing really ambitious for now.
 
-changes made so far:
+changelog #0 - may 29, 2023:
 -master volume meter:
  -shows the master volume, in binary. it can also be used to see digi samples being played.
 
@@ -16,8 +16,29 @@ changes made so far:
 -changes on the keybinds:
  -nothing really interesting, now you can use either the esc or the 'q' key to stop playing. i decided to add the 'q' key 'cos lazy hands like mine wouldn't have to move to such a distant place. yeah, i know what you're thinking.
 
+changelog #1 - june 3, 2023:
+-more keybind changes:
+ -now you can use the 'j' and 'l' keys to move around subtunes, rather than arrow keys, or the ',' and '.' or '<' and '>' keys used in the original version.
+ -now you can also use the 'k' key to pause and unpause tunes. don't those keys sound familiar? yeah, i got that idea from the youtube player :)
+
+-new "replay" feature:
+ -now you don't need to worry about the 4 sec timeout if you wanna replay a tune. just punch the 'r' key and that's it.
+
+-new "search" feature:
+ -now you can jump to a subtune without having to smash the arrow keys. just remember the number of the subtune you wanna jump to, punch the 's' key, type the number in, hit 'enter', and there you go.
+
+-the new keybinds are now shown in the player, 'cos they're the ones i recommend to use, since you won't need to move your fingers to kinda 'awkward' positions.
+
+-in the original sidplayfp, firing it up with both the '-v' and '-q' options kinda messes the app, some parts (like the note, control etc. viewer) just get displayed, even though quiet mode is on. so, i decided to fix that a bit.
+ -oh yeah, and now the "maximum" quiet level is 3 and up, the original has > 2. i set to 3 so i can still use the keybinds, unlike the original sidplayfp, where setting the quiet level to > 2 disables all inputs.
+
+-some irrelevant changes on the appearance, like changing the default 'junctionLeft' and 'junctionRight' options to ':'. looks a bit prettier to me, i guess.
+
 -current plans:
- -none. i might suddenly come up with one without even mentioning, though.
+ -some complicated stuff that i probably won't be able to do now:
+  -add an "open" keybind, so you can load a different file while sidplayfp still runs;
+  -keep playing while suspended, giving you nice background music;
+  -add an "infinite" keybind, so you can choose a specific tune to loop, rather than giving the same setting to all tunes at once.
 
 "sidplayfp
 =========

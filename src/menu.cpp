@@ -127,17 +127,22 @@ const char *ConsolePlayer::getNote(uint16_t freq) {
 #endif
 // Display console menu
 void ConsolePlayer::menu () {
-    if (m_quietLevel > 1)
+    if (m_quietLevel > 1) {
+        if (m_driver.file)
+            cerr << "Creating audio file...";
+        else
+            cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S]";
         return;
+    }
 
     const SidInfo &info         = m_engine.info ();
     const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
-    // cerr << (char) 12 << '\f'; // New Page
     if ((m_iniCfg.console ()).ansi) {
         cerr << '\x1b' << "[40m";  // Background black
         cerr << '\x1b' << "[2J";   // Clear screen
         cerr << '\x1b' << "[0;0H"; // Move cursor to 0,0
+	cerr << '\x1b' << "[?25l"; // hide the cursor
     }
 
     if (m_verboseLevel > 1) {
@@ -256,7 +261,7 @@ void ConsolePlayer::menu () {
     }
 
     if (m_track.loop)
-        cerr << " (on loop)";
+        cerr << " - loop on";
 
     cerr << endl;
 
@@ -303,8 +308,7 @@ void ConsolePlayer::menu () {
         cerr << "DRIVER = ";
         if (info.driverAddr() == 0)
             cerr << "NOT PRESENT";
-        else
-        {
+        else {
             cerr << "$"  << setw(4) << setfill('0') << info.driverAddr();
             cerr << " - $" << setw(4) << setfill('0') << info.driverAddr() +
                 (info.driverLength() - 1);
@@ -418,7 +422,7 @@ void ConsolePlayer::menu () {
 
     consoleTable  (tableMiddle);
     consoleColour (magenta, true);
-    cerr << " Kernal ROM   : ";
+    cerr << " KERNAL ROM   : ";
     if (strlen(romDesc) == 0) {
         consoleColour (red, false);
         cerr << "None - some tunes may not play!";
@@ -463,11 +467,19 @@ void ConsolePlayer::menu () {
     cerr << endl;
 
 #ifdef FEAT_REGS_DUMP_SID
+    if (m_quietLevel >= 1) {
+	consoleTable (tableEnd);
+        if (m_driver.file)
+            cerr << "Creating audio file...";
+        else
+            cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S]";
+	return;
+    }
     if (m_verboseLevel > 1) {
         consoleTable (tableSeparator);
         consoleTable (tableMiddle);
 	cerr << "          Note  PW         Control          Waveform(s)" << endl;
-        for (int i=0; i < tuneInfo->sidChips() * 6 + 0; i++) { // reserve space for each voice status
+        for (int i=0; i < tuneInfo->sidChips() * 6; i++) { // reserve space for each voice status
             consoleTable (tableMiddle); cerr << endl;
 	}
     }
@@ -477,7 +489,7 @@ void ConsolePlayer::menu () {
     if (m_driver.file)
         cerr << "Creating audio file - ";
     else
-        cerr << "Prev. [<] Pause [P] Next [>] Stop [Q] Time: ";
+        cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S] Time: ";
 
     // Get all the text to the screen so music playback
     // is not disturbed.
@@ -487,11 +499,13 @@ void ConsolePlayer::menu () {
 }
 
 void ConsolePlayer::refreshRegDump() {
+    if (m_quietLevel)
+	return;
 #ifdef FEAT_REGS_DUMP_SID
     if (m_verboseLevel > 1) {
         const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
-        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor X lines up
+        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor enough for redrawing the viewer lines
 
         for (int j=0; j < tuneInfo->sidChips(); j++) {
             uint8_t* registers = m_registers[j];
@@ -651,7 +665,7 @@ void ConsolePlayer::refreshRegDump() {
     if (m_driver.file)
         cerr << "Creating audio file - ";
     else
-        cerr << "Prev. [<] Pause [P] Next [>] Stop [Q] Time: ";
+        cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S] Time: ";
 
     cerr << flush;
 }
@@ -716,6 +730,8 @@ void ConsolePlayer::consoleTable (player_table_t table) {
 
 // Restore Ansi Console to defaults
 void ConsolePlayer::consoleRestore () {
-    if ((m_iniCfg.console ()).ansi)
+    if ((m_iniCfg.console ()).ansi) {
+	cerr << '\x1b' << "[?25h";
         cerr << '\x1b' << "[0m";
+    }
 }

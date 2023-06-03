@@ -50,15 +50,15 @@ public:
 
     struct console_section
     {   // INI Section - [Console]
-        bool ansi;
-        char topLeft;
-        char topRight;
-        char bottomLeft;
-        char bottomRight;
-        char vertical;
-        char horizontal;
-        char junctionLeft;
-        char junctionRight;
+        bool       ansi;
+        char       topLeft;
+        char       topRight;
+        char       bottomLeft;
+        char       bottomRight;
+        char       vertical;
+        char       horizontal;
+        char       junctionLeft;
+        char       junctionRight;
     };
 
     struct audio_section

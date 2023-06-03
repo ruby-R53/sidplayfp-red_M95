@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// slightly modified by red M95 ;)
 
 #include "keyboard.h"
 
@@ -41,8 +42,7 @@ int _getch (void);
 #define ESC '\033'
 
 // Special Extended Key Definitions
-enum
-{
+enum {
     PCK_HOME     = '\107',
     PCK_UP       = '\110',
     PCK_LEFT     = '\113',
@@ -52,8 +52,7 @@ enum
     PCK_EXTENDED = '\340'
 };
 
-static char keytable[] =
-{
+static char keytable[] = {
     // Windows Special Cursors
 #ifdef _WIN32
     PCK_EXTENDED, PCK_RIGHT,0, A_RIGHT_ARROW,
@@ -93,32 +92,33 @@ static char keytable[] =
 
     // General Keys
     'p',0,                     A_PAUSED,
+    'k',0,                     A_PAUSED,
     ESC,ESC,0,                 A_QUIT,
     'q',0,                     A_QUIT,
+    's',0,                     A_SEARCH,
+    'r',0,                     A_REPLAY,
 
     // Old Keys
-    '>',0,                     A_RIGHT_ARROW,
     '<',0,                     A_LEFT_ARROW,
-    '.',0,                     A_RIGHT_ARROW,
+    '>',0,                     A_RIGHT_ARROW,
     ',',0,                     A_LEFT_ARROW,
+    '.',0,                     A_RIGHT_ARROW,
+    'j',0,                     A_LEFT_ARROW,
+    'l',0,                     A_RIGHT_ARROW,
 
     0,                         A_END_LIST
 };
 
-
 /*
  * Search a single command table for the command string in cmd.
  */
-static int keyboard_search (char *cmd)
-{
+static int keyboard_search (char *cmd) {
     char *p;
     char *q;
     int   a;
 
-    for (p = keytable, q = cmd;;  p++, q++)
-    {
-        if (*p == *q)
-        {
+    for (p = keytable, q = cmd;;  p++, q++) {
+        if (*p == *q) {
             /*
              * Current characters match.
              * If we're at the end of the string, we've found it.
@@ -126,13 +126,11 @@ static int keyboard_search (char *cmd)
              * after the null at the end of the string
              * in the command table.
              */
-            if (*p == '\0')
-            {
+            if (*p == '\0') {
                 a = *++p & 0377;
                 while (a == A_SKIP)
                     a = *++p & 0377;
-                if (a == A_END_LIST)
-                {
+                if (a == A_END_LIST) {
                     /*
                      * We get here only if the original
                      * cmd string passed in was empty ("").
@@ -144,8 +142,7 @@ static int keyboard_search (char *cmd)
                 return (a);
             }
         }
-        else if (*q == '\0')
-        {
+        else if (*q == '\0') {
             /*
              * Hit the end of the user's command,
              * but not the end of the string in the command table.
@@ -153,16 +150,14 @@ static int keyboard_search (char *cmd)
              */
             return (A_PREFIX);
         }
-        else
-        {
+        else {
             /*
              * Not a match.
              * Skip ahead to the next command in the
              * command table, and reset the pointer
              * to the beginning of the user's command.
              */
-            if (*p == '\0' && p[1] == A_END_LIST)
-            {
+            if (*p == '\0' && p[1] == A_END_LIST) {
                 /*
                  * A_END_LIST is a special marker that tells
                  * us to abort the cmd search.
@@ -182,8 +177,7 @@ static int keyboard_search (char *cmd)
     return (A_INVALID);
 }
 
-int keyboard_decode ()
-{
+int keyboard_decode () {
     char cmd[MAX_CMDLEN+1];
     int  nch = 0;
     int  action = A_NONE;
@@ -195,15 +189,13 @@ int keyboard_decode ()
     int c = _getch();
     if (c == '\0')
         c = '\340'; // 224
-    else if (c == ESC)
-    {
+    else if (c == ESC) {
         cmd[nch++] = c;
         if (_kbhit ())
             c = _getch ();
     }
 
-    while (c >= 0)
-    {
+    while (c >= 0) {
         cmd[nch++] = c;
         cmd[nch]   = '\0';
         action     = keyboard_search (cmd);
@@ -222,10 +214,8 @@ int keyboard_decode ()
 
 static int infd = -1;
 
-int _kbhit (void)
-{
-    if (infd >= 0)
-    {   // Set no delay
+int _kbhit (void) {
+    if (infd >= 0) { // Set no delay
         static struct timeval tv = {0, 0};
         fd_set rdfs;
 
@@ -240,18 +230,16 @@ int _kbhit (void)
     return 0;
 }
 
-int _getch (void)
-{
+int _getch (void) {
     char ch = -1;
     if (infd >= 0)
         read (infd, &ch, 1);
     return ch;
 }
 
-// Set keyboard to raw mode to getch will work
+// Set keyboard to raw mode so getch will work
 static termios term;
-void keyboard_enable_raw ()
-{
+void keyboard_enable_raw () {
     // set to non canonical mode, echo off, ignore signals
     struct termios current;
 
@@ -264,8 +252,7 @@ void keyboard_enable_raw ()
         infd = STDIN_FILENO;
     else if (isatty (STDERR_FILENO))
         infd = STDERR_FILENO;
-    else
-    {   // Try opening a terminal directly
+    else { // Try opening a terminal directly
         infd = open("/dev/tty", O_RDONLY);
         if (infd < 0)
             return;
@@ -282,13 +269,10 @@ void keyboard_enable_raw ()
     tcsetattr (infd, TCSAFLUSH, &current);
 }
 
-void keyboard_disable_raw ()
-{
-    if (infd >= 0)
-    {   // Restore old terminal settings
+void keyboard_disable_raw () {
+    if (infd >= 0) {   // Restore old terminal settings
         tcsetattr (infd, TCSAFLUSH, &term);
-        switch (infd)
-        {
+        switch (infd) {
         case STDIN_FILENO:
         case STDERR_FILENO:
             break;

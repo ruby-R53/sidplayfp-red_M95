@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// slightly modified by red M95 ;)
 
 #ifndef PLAYER_H
 #define PLAYER_H
@@ -54,16 +55,14 @@ typedef enum { black, red, green, yellow, blue, magenta, cyan, white }
     player_colour_t;
 typedef enum { tableStart, tableMiddle, tableSeparator, tableEnd }
     player_table_t;
-typedef enum
-{
+typedef enum {
     playerError = 0, playerRunning, playerPaused, playerStopped,
     playerRestart, playerExit, playerFast = 128,
     playerFastRestart = playerRestart | playerFast,
     playerFastExit = playerExit | playerFast
 } player_state_t;
 
-typedef enum
-{
+typedef enum {
     /* Same as EMU_DEFAULT except no soundcard.
     Still allows wav generation */
     EMU_NONE = 0,
@@ -73,8 +72,7 @@ typedef enum
     EMU_HARDSID, EMU_EXSID, EMU_SIDSTATION, EMU_COMMODORE,
     EMU_SIDSYN, EMU_END} SIDEMUS;
 
-typedef enum
-{
+typedef enum {
     /* Define possible output sources */
     OUT_NULL = 0,
     /* Hardware */
@@ -84,8 +82,7 @@ typedef enum
 } OUTPUTS;
 
 // Error and status message numbers.
-enum
-{
+enum {
     ERR_SYNTAX = 0,
     ERR_NOT_ENOUGH_MEMORY,
     ERR_SIGHANDLER,
@@ -94,10 +91,8 @@ enum
 
 void displayError (const char *arg0, unsigned int num);
 
-
 // Grouped global variables
-class ConsolePlayer
-{
+class ConsolePlayer {
 private:
 #ifdef HAVE_SIDPLAYFP_BUILDERS_RESIDFP_H
     static const char  RESIDFP_ID[];
@@ -142,8 +137,7 @@ private:
     int  m_channels;
     int  m_precision;
 
-    struct m_filter_t
-    {
+    struct m_filter_t {
         // Filter parameter for reSID
         double         bias;
         // Filter parameters for reSIDfp
@@ -153,8 +147,7 @@ private:
         bool           enabled;
     } m_filter;
 
-    struct m_driver_t
-    {
+    struct m_driver_t {
         OUTPUTS        output;   // Selected output type
         SIDEMUS        sid;      // Sid emulation
         bool           file;     // File based driver
@@ -165,8 +158,7 @@ private:
         Audio_Null     null;     // Used for everything
     } m_driver;
 
-    struct m_timer_t
-    {   // secs
+    struct m_timer_t { // secs
         uint_least32_t start;
         uint_least32_t current;
         uint_least32_t stop;
@@ -175,17 +167,16 @@ private:
         bool           starting;
     } m_timer;
 
-    struct m_track_t
-    {
+    struct m_track_t {
         uint_least16_t first;
         uint_least16_t selected;
         uint_least16_t songs;
         bool           loop;
         bool           single;
+	int            query;
     } m_track;
 
-    struct m_speed_t
-    {
+    struct m_speed_t {
         uint_least8_t current;
         uint_least8_t max;
     } m_speed;
@@ -204,7 +195,7 @@ private:
     void displayError   (const char *error);
     void displayError   (unsigned int num) { ::displayError (m_name, num); }
     void decodeKeys     (void);
-    void updateDisplay();
+    void updateDisplay  ();
     void emuflush       (void);
     void menu           (void);
     void refreshRegDump ();

@@ -52,17 +52,14 @@ using std::endl;
 /**
  * Try load SID tune from HVSC_BASE
  */
-bool ConsolePlayer::tryOpenTune(const char *hvscBase)
-{
+bool ConsolePlayer::tryOpenTune(const char *hvscBase) {
     std::string newFileName(hvscBase);
 
     newFileName.append(SEPARATOR).append(m_filename);
     m_tune.load(newFileName.c_str());
-    if (!m_tune.getStatus())
-    {
+    if (!m_tune.getStatus()) {
         return false;
     }
-
     m_filename.assign(newFileName);
     return true;
 }
@@ -70,8 +67,7 @@ bool ConsolePlayer::tryOpenTune(const char *hvscBase)
 /**
  * Try load songlength DB from HVSC_BASE
  */
-bool ConsolePlayer::tryOpenDatabase(const char *hvscBase, const char *suffix)
-{
+bool ConsolePlayer::tryOpenDatabase(const char *hvscBase, const char *suffix) {
     std::string newFileName(hvscBase);
 
     newFileName.append(SEPARATOR).append("DOCUMENTS").append(SEPARATOR).append("Songlengths.").append(suffix);
@@ -79,8 +75,7 @@ bool ConsolePlayer::tryOpenDatabase(const char *hvscBase, const char *suffix)
 }
 
 // Convert time from integer
-bool parseTime(const char *str, uint_least32_t &time)
-{
+bool parseTime(const char *str, uint_least32_t &time) {
     // Check for empty string
     if (*str == '\0')
         return false;
@@ -89,12 +84,10 @@ bool parseTime(const char *str, uint_least32_t &time)
     uint_least32_t milliseconds = 0;
 
     char *sep = (char *) strstr (str, ":");
-    if (!sep)
-    {   // User gave seconds
+    if (!sep) { // User gave seconds
         _time = atoi (str);
     }
-    else
-    {   // Read in MM:SS[.mmm] format
+    else { // Read in MM:SS[.mmm] format
         int val;
         *sep = '\0';
         val  = atoi (str);
@@ -103,8 +96,7 @@ bool parseTime(const char *str, uint_least32_t &time)
         _time = (uint_least32_t) val * 60;
         // parse milliseconds
         char *milli = (char *) strstr (sep+1, ".");
-        if (milli)
-        {
+        if (milli) {
             char *start = milli + 1;
             char *end;
             milliseconds = strtol(start, &end, 10);
@@ -126,13 +118,11 @@ bool parseTime(const char *str, uint_least32_t &time)
             return false;
         _time += (uint_least32_t) val;
     }
-
     time = _time * 1000 + milliseconds;
     return true;
 }
 
-bool parseAddress(const char *str, uint_least16_t &address)
-{
+bool parseAddress(const char *str, uint_least16_t &address) {
     if (*str == '\0')
         return false;
 
@@ -142,8 +132,7 @@ bool parseAddress(const char *str, uint_least16_t &address)
     return true;
 }
 
-void displayDebugArgs()
-{
+void displayDebugArgs() {
     std::ostream &out = cout;
 
     out << "Debug Options:" << endl
@@ -155,10 +144,8 @@ void displayDebugArgs()
 }
 
 // Parse command line arguments
-int ConsolePlayer::args(int argc, const char *argv[])
-{
-    if (argc == 0) // at least one argument required
-    {
+int ConsolePlayer::args(int argc, const char *argv[]) {
+    if (argc == 0) { // at least one argument required 
         displayArgs ();
         return -1;
     }
@@ -168,8 +155,7 @@ int ConsolePlayer::args(int argc, const char *argv[])
     m_driver.file   = false;
     m_driver.info   = false;
 
-    for (int i=0; i<9; i++)
-    {
+    for (int i=0; i<9; i++) {
         vMute[i] = false;
     }
 
@@ -178,92 +164,78 @@ int ConsolePlayer::args(int argc, const char *argv[])
     bool err    = false;
 
     // parse command line arguments
-    while ((i < argc) && (argv[i] != nullptr))
-    {
-        if ((argv[i][0] == '-') && (argv[i][1] != '\0'))
-        {
+    while ((i < argc) && (argv[i] != nullptr)) {
+        if ((argv[i][0] == '-') && (argv[i][1] != '\0')) {
             // help options
-            if ((argv[i][1] == 'h') || !strcmp(&argv[i][1], "-help"))
-            {
+            if ((argv[i][1] == 'h') || !strcmp(&argv[i][1], "-help")) {
                 displayArgs ();
                 return 0;
             }
-            else if (!strcmp(&argv[i][1], "-help-debug"))
-            {
+            else if (!strcmp(&argv[i][1], "-help-debug")) {
                 displayDebugArgs ();
                 return 0;
             }
 
-            else if (argv[i][1] == 'b')
-            {
+            else if (argv[i][1] == 'b') {
                 if (!parseTime (&argv[i][2], m_timer.start))
                     err = true;
             }
-            else if (strncmp (&argv[i][1], "ds", 2) == 0)
-            {   // Override sidTune and enable the second sid
+            else if (strncmp(&argv[i][1], "ds", 2) == 0) { // Override sidTune
+												  // and enable SID #2
                 if (!parseAddress (&argv[i][3], m_engCfg.secondSidAddress))
                     err = true;
             }
 #ifdef FEAT_THIRD_SID
-            else if (strncmp (&argv[i][1], "ts", 2) == 0)
-            {   // Override sidTune and enable the third sid
+            else if (strncmp(&argv[i][1], "ts", 2) == 0) { // Override sidTune
+		                                                                                  // and enable SID #3
                 if (!parseAddress (&argv[i][3], m_engCfg.thirdSidAddress))
                     err = true;
             }
 #endif
-            else if (argv[i][1] == 'f')
-            {
+            else if (argv[i][1] == 'f') {
                 if (argv[i][2] == '\0')
                     err = true;
                 m_engCfg.frequency = (uint_least32_t) atoi (argv[i]+2);
             }
 
             // No filter options
-            else if (strncmp (&argv[i][1], "nf", 2) == 0)
-            {
+            else if (strncmp (&argv[i][1], "nf", 2) == 0) {
                 if (argv[i][3] == '\0')
                     m_filter.enabled = false;
             }
 
             // Track options
-            else if (strncmp (&argv[i][1], "ols", 3) == 0)
-            {
+            else if (strncmp (&argv[i][1], "ols", 3) == 0) {
                 m_track.loop   = true;
                 m_track.single = true;
                 m_track.first  = atoi(&argv[i][4]);
             }
-            else if (strncmp (&argv[i][1], "ol", 2) == 0)
-            {
+            else if (strncmp (&argv[i][1], "ol", 2) == 0) {
                 m_track.loop  = true;
                 m_track.first = atoi(&argv[i][3]);
             }
-            else if (strncmp (&argv[i][1], "os", 2) == 0)
-            {
+            else if (strncmp (&argv[i][1], "os", 2) == 0) {
                 m_track.single = true;
                 m_track.first  = atoi(&argv[i][3]);
             }
-            else if (argv[i][1] == 'o')
-            {   // User forgot track number ?
+            else if (argv[i][1] == 'o') { // User forgot track number ?
                 if (argv[i][2] == '\0')
                     err = true;
                 m_track.first = atoi(&argv[i][2]);
             }
 
             // Channel muting
-            else if (argv[i][1] == 'u')
-            {
+            else if (argv[i][1] == 'u') {
                 if (argv[i][2] == '\0')
                     err = true;
-                else
-                {
+                else {
                     const int voice = atoi(&argv[i][2]);
                     if (voice > 0 && voice <= 9)
                         vMute[voice-1] = true;
                 }
             }
 
-            else if (argv[i][1] == 'p')
-            {   // User forgot precision
+            else if (argv[i][1] == 'p') { // User forgot precision
                 if (argv[i][2] == '\0')
                     err = true;
                 {
@@ -275,206 +247,170 @@ int ConsolePlayer::args(int argc, const char *argv[])
                 }
             }
 
-            else if (argv[i][1] == 'q')
-            {
+            else if (argv[i][1] == 'q') {
                 if (argv[i][2] == '\0')
                     m_quietLevel = 1;
                 else
                     m_quietLevel = atoi(&argv[i][2]);
             }
 
-            else if (argv[i][1] == 't')
-            {
+            else if (argv[i][1] == 't') {
                 if (!parseTime (&argv[i][2], m_timer.length))
                     err = true;
                 m_timer.valid = true;
             }
 
             // Resampling Options ----------
-            else if (strcmp (&argv[i][1], "rif") == 0)
-            {
+            else if (strcmp (&argv[i][1], "rif") == 0) {
                 m_engCfg.samplingMethod = SidConfig::INTERPOLATE;
                 m_engCfg.fastSampling = true;
             }
-            else if (strcmp (&argv[i][1], "rrf") == 0)
-            {
+            else if (strcmp (&argv[i][1], "rrf") == 0) {
                 m_engCfg.samplingMethod = SidConfig::RESAMPLE_INTERPOLATE;
                 m_engCfg.fastSampling = true;
             }
-            else if (strcmp (&argv[i][1], "ri") == 0)
-            {
+            else if (strcmp (&argv[i][1], "ri") == 0) {
                 m_engCfg.samplingMethod = SidConfig::INTERPOLATE;
             }
-            else if (strcmp (&argv[i][1], "rr") == 0)
-            {
+            else if (strcmp (&argv[i][1], "rr") == 0) {
                 m_engCfg.samplingMethod = SidConfig::RESAMPLE_INTERPOLATE;
             }
 
             // SID model options
-            else if (strcmp (&argv[i][1], "mof") == 0)
-            {
+            else if (strcmp (&argv[i][1], "mof") == 0) {
                 m_engCfg.defaultSidModel = SidConfig::MOS6581;
                 m_engCfg.forceSidModel = true;
             }
-            else if (strcmp (&argv[i][1], "mnf") == 0)
-            {
+            else if (strcmp (&argv[i][1], "mnf") == 0) {
                 m_engCfg.defaultSidModel = SidConfig::MOS8580;
                 m_engCfg.forceSidModel = true;
             }
-            else if (strcmp (&argv[i][1], "mo") == 0)
-            {
+            else if (strcmp (&argv[i][1], "mo") == 0) {
                 m_engCfg.defaultSidModel = SidConfig::MOS6581;
             }
-            else if (strcmp (&argv[i][1], "mn") == 0)
-            {
+            else if (strcmp (&argv[i][1], "mn") == 0) {
                 m_engCfg.defaultSidModel = SidConfig::MOS8580;
             }
 
-            else if (argv[i][1] == 's')
-            {   // Stereo Playback
+            else if (argv[i][1] == 's') { // Stereo Playback
                 m_channels = 2;
             }
-            else if (argv[i][1] == 'm')
-            {   // Mono Playback
+            else if (argv[i][1] == 'm') { // Mono Playback
                 m_channels = 1;
             }
 
 #ifdef FEAT_DIGIBOOST
-            else if (strcmp (&argv[i][1], "-digiboost") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-digiboost") == 0) {
                 m_engCfg.digiBoost = true;
             }
 #endif
             // Video/Verbose Options
-            else if (strcmp (&argv[i][1], "vnf") == 0)
-            {
+            else if (strcmp (&argv[i][1], "vnf") == 0) {
                 m_engCfg.forceC64Model = true;
                 m_engCfg.defaultC64Model  = SidConfig::NTSC;
             }
-            else if (strcmp (&argv[i][1], "vpf") == 0)
-            {
+            else if (strcmp (&argv[i][1], "vpf") == 0) {
                 m_engCfg.forceC64Model = true;
                 m_engCfg.defaultC64Model  = SidConfig::PAL;
             }
-            else if (strcmp (&argv[i][1], "vf") == 0)
-            {
+            else if (strcmp (&argv[i][1], "vf") == 0) {
                 m_engCfg.forceC64Model = true;
             }
-            else if (strcmp (&argv[i][1], "vn") == 0)
-            {
+            else if (strcmp (&argv[i][1], "vn") == 0) {
                 m_engCfg.defaultC64Model  = SidConfig::NTSC;
             }
-            else if (strcmp (&argv[i][1], "vp") == 0)
-            {
+            else if (strcmp (&argv[i][1], "vp") == 0) {
                 m_engCfg.defaultC64Model  = SidConfig::PAL;
             }
-            else if (argv[i][1] == 'v')
-            {
+            else if (argv[i][1] == 'v') {
                 if (argv[i][2] == '\0')
                     m_verboseLevel = 1;
                 else
                     m_verboseLevel = atoi(&argv[i][2]);
             }
-            else if (strncmp (&argv[i][1], "-delay=", 7) == 0)
-            {
+            else if (strncmp (&argv[i][1], "-delay=", 7) == 0) {
                 m_engCfg.powerOnDelay = (uint_least16_t) atoi(&argv[i][8]);
             }
             // File format conversions
-            else if (argv[i][1] == 'w')
-            {
+            else if (argv[i][1] == 'w') {
                 m_driver.output = OUT_WAV;
                 m_driver.file   = true;
                 if (argv[i][2] != '\0')
                     m_outfile = &argv[i][2];
             }
-            else if (strncmp (&argv[i][1], "-wav", 4) == 0)
-            {
+            else if (strncmp (&argv[i][1], "-wav", 4) == 0) {
                 m_driver.output = OUT_WAV;
                 m_driver.file   = true;
                 if (argv[i][5] != '\0')
                     m_outfile = &argv[i][5];
             }
-            else if (strncmp (&argv[i][1], "-au", 3) == 0)
-            {
+            else if (strncmp (&argv[i][1], "-au", 3) == 0) {
                 m_driver.output = OUT_AU;
                 m_driver.file   = true;
                 if (argv[i][4] != '\0')
                     m_outfile = &argv[i][4];
             }
-            else if (strncmp (&argv[i][1], "-info", 5) == 0)
-            {
+            else if (strncmp (&argv[i][1], "-info", 5) == 0) {
                 m_driver.info   = true;
             }
 #ifdef HAVE_SIDPLAYFP_BUILDERS_RESIDFP_H
-            else if (strcmp (&argv[i][1], "-residfp") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-residfp") == 0) {
                 m_driver.sid    = EMU_RESIDFP;
             }
 #endif // HAVE_SIDPLAYFP_BUILDERS_RESIDFP_H
 
 #ifdef HAVE_SIDPLAYFP_BUILDERS_RESID_H
-            else if (strcmp (&argv[i][1], "-resid") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-resid") == 0) {
                 m_driver.sid    = EMU_RESID;
             }
 #endif // HAVE_SIDPLAYFP_BUILDERS_RESID_H
 
             // Hardware selection
 #ifdef HAVE_SIDPLAYFP_BUILDERS_HARDSID_H
-            else if (strcmp (&argv[i][1], "-hardsid") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-hardsid") == 0) {
                 m_driver.sid    = EMU_HARDSID;
                 m_driver.output = OUT_NULL;
             }
 #endif // HAVE_SIDPLAYFP_BUILDERS_HARDSID_H
 
 #ifdef HAVE_SIDPLAYFP_BUILDERS_EXSID_H
-            else if (strcmp (&argv[i][1], "-exsid") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-exsid") == 0) {
                 m_driver.sid    = EMU_EXSID;
                 m_driver.output = OUT_NULL;
             }
 #endif // HAVE_SIDPLAYFP_BUILDERS_EXSID_H
 
             // These are for debug
-            else if (strcmp (&argv[i][1], "-none") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-none") == 0) {
                 m_driver.sid    = EMU_NONE;
                 m_driver.output = OUT_NULL;
             }
-            else if (strcmp (&argv[i][1], "-nosid") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-nosid") == 0) {
                 m_driver.sid = EMU_NONE;
             }
-            else if (strcmp (&argv[i][1], "-noaudio") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-noaudio") == 0) {
                 m_driver.output = OUT_NULL;
             }
-            else if (strcmp (&argv[i][1], "-cpu-debug") == 0)
-            {
+            else if (strcmp (&argv[i][1], "-cpu-debug") == 0) {
                 m_cpudebug = true;
             }
 
-            else
-            {
+            else {
                 err = true;
             }
 
         }
-        else
-        {   // Reading file name
+        else { // Reading file name
             if (infile == 0)
                 infile = i;
             else
                 err = true;
         }
 
-        if (err)
-        {
+        if (err) {
             displayArgs (argv[i]);
             return -1;
         }
-
         i++;  // next index
     }
 
@@ -483,13 +419,11 @@ int ConsolePlayer::args(int argc, const char *argv[])
     // Load the tune
     m_filename = argv[infile];
     m_tune.load(m_filename.c_str());
-    if (!m_tune.getStatus())
-    {
+    if (!m_tune.getStatus()) {
         std::string errorString(m_tune.statusString());
 
         // Try prepending HVSC_BASE
-        if (!hvscBase || !tryOpenTune(hvscBase))
-        {
+        if (!hvscBase || !tryOpenTune(hvscBase)) {
             displayError(errorString.c_str());
             return -1;
         }
@@ -505,14 +439,12 @@ int ConsolePlayer::args(int argc, const char *argv[])
 
     // Check to see if we are trying to generate an audio file
     // whilst using a hardware emulation
-    if (m_driver.file && (m_driver.sid >= EMU_HARDSID))
-    {
-        displayError ("ERROR: Cannot generate audio files using hardware emulations");
+    if (m_driver.file && (m_driver.sid >= EMU_HARDSID)) {
+        displayError ("ERROR: cannot generate audio files using hardware emulations");
         return -1;
     }
 
-    if (m_driver.info && m_driver.file)
-    {
+    if (m_driver.info && m_driver.file) {
         displayError ("WARNING: metadata can be added only to wav files");
     }
 
@@ -525,37 +457,30 @@ int ConsolePlayer::args(int argc, const char *argv[])
     // If user provided no time then load songlength database
     // and set default lengths in case it's not found in there.
     {
-        if (m_driver.file && m_timer.valid && !m_timer.length)
-        {   // Time of 0 provided for wav generation
+        if (m_driver.file && m_timer.valid && !m_timer.length) { // Time of 0 provided for wav generation
             displayError ("ERROR: -t0 invalid in record mode");
             return -1;
         }
-        if (!m_timer.valid)
-        {
+        if (!m_timer.valid) {
             m_timer.length = m_driver.file
                 ? (m_iniCfg.sidplay2()).recordLength
                 : (m_iniCfg.sidplay2()).playLength;
 
 
             bool dbOpened = false;
-            if (hvscBase)
-            {
-                if (tryOpenDatabase(hvscBase, "md5"))
-                {
+            if (hvscBase) {
+                if (tryOpenDatabase(hvscBase, "md5")) {
                     dbOpened = true;
                     newSonglengthDB = true;
                 }
-                else if (tryOpenDatabase(hvscBase, "txt"))
-                {
+                else if (tryOpenDatabase(hvscBase, "txt")) {
                     dbOpened = true;
                 }
             }
 
-            if (!dbOpened)
-            {
+            if (!dbOpened) {
                 // Try load user configured songlength DB
-                if ((m_iniCfg.sidplay2()).database.length() != 0)
-                {
+                if ((m_iniCfg.sidplay2()).database.length() != 0) {
                     // Try loading the database specificed by the user
 #if defined(_WIN32) && defined(UNICODE)
 #  ifdef FEAT_DB_WCHAR_OPEN
@@ -569,8 +494,7 @@ int ConsolePlayer::args(int argc, const char *argv[])
 #else
                     const char *database = (m_iniCfg.sidplay2()).database.c_str();
 #endif
-                    if (!m_database.open(database))
-                    {
+                    if (!m_database.open(database)) {
                         displayError (m_database.error ());
                         return -1;
                     }
@@ -584,16 +508,14 @@ int ConsolePlayer::args(int argc, const char *argv[])
 
 #if HAVE_TSID == 1
     // Set TSIDs base directory
-    if (!m_tsid.setBaseDir(true))
-    {
+    if (!m_tsid.setBaseDir(true) {
         displayError (m_tsid.getError ());
         return -1;
     }
 #endif
 
     // Configure engine with settings
-    if (!m_engine.config (m_engCfg))
-    {   // Config failed
+    if (!m_engine.config (m_engCfg)) { // Config failed
         displayError (m_engine.error ());
         return -1;
     }
@@ -601,12 +523,11 @@ int ConsolePlayer::args(int argc, const char *argv[])
 }
 
 
-void ConsolePlayer::displayArgs (const char *arg)
-{
+void ConsolePlayer::displayArgs (const char *arg) {
     std::ostream &out = arg ? cerr : cout;
 
     if (arg)
-        out << "Option Error: " << arg << endl;
+        out << "Invalid option: " << arg << endl;
     else
         out << "Syntax: " << m_name << " [-<option>...] <datafile>" << endl;
 
@@ -617,11 +538,10 @@ void ConsolePlayer::displayArgs (const char *arg)
 
         << " -f<num>      set frequency in Hz (default: "
         << SidConfig::DEFAULT_SAMPLING_FREQ << ")" << endl
-        << " -ds<addr>    set second sid address (e.g. -ds0xd420)" << endl
+        << " -d=<addr>    set second SID address (e.g. -d=0xd420)" << endl
 #ifdef FEAT_THIRD_SID
-        << " -ts<addr>    set third sid address (e.g. -ts0xd440)" << endl
+        << " -t=<addr>    set third SID address (e.g. -t=0xd440)" << endl
 #endif
-
         << " -u<num>      mute voice <num> (e.g. -u1 -u2)" << endl
 
         << " -nf          no SID filter emulation" << endl
@@ -629,13 +549,12 @@ void ConsolePlayer::displayArgs (const char *arg)
         << " -o<l|s>      looping and/or single track" << endl
         << " -o<num>      start track (default: preset)" << endl
 
-        << " -p<num>      set format for file output (16 = signed 16 bit, 32 = 32 bit float)"
-        << "(default: 16)" << endl
+        << " -p<num>      set format for file output (16 = signed 16 bit, 32 = 32 bit float, default: 16)" << endl
 
         << " -s           force stereo output" << endl
         << " -m           force mono output" << endl
 
-        << " -t<num>      set play length in [mins:]secs[.milli] format (0 is endless)" << endl
+        << " -t<num>      set play length in [mins:]secs[.milli] format (0 = infinite)" << endl
 
         << " -<v|q>[x]    verbose or quiet output. x is the optional level, default=1" << endl
         << " -v[p|n][f]   set VIC PAL/NTSC clock speed (default: defined by song)" << endl
@@ -646,8 +565,8 @@ void ConsolePlayer::displayArgs (const char *arg)
 #ifdef FEAT_DIGIBOOST
         << " --digiboost  Enable digiboost for 8580 model" << endl
 #endif
-        << " -r[i|r][f]   set resampling method (default: resample interpolate)" << endl
-        << "              Use 'f' to enable fast resampling (only for reSID)" << endl
+        << " -r[i|r][f]   Set resampling method (default: resample interpolate)," << endl
+        << "              use 'f' to enable fast resampling (reSID-only)" << endl
 
         << " -w[name]     create wav file (default: <datafile>[n].wav)" << endl
         << " --au[name]   create au file (default: <datafile>[n].au)" << endl

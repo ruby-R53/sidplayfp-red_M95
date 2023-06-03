@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// slightly modified by red M95 ;)
 
 #ifdef _WIN32
 #  include <conio.h>
@@ -25,8 +26,7 @@
     int _kbhit (void);
 #endif
 
-enum
-{
+enum {
     A_NONE = 0,
 
     // Standard Commands
@@ -44,6 +44,8 @@ enum
     A_END,
     A_PAUSED,
     A_QUIT,
+    A_SEARCH,
+    A_REPLAY,
 
     /* Debug */
     A_TOGGLE_VOICE1,
@@ -55,6 +57,7 @@ enum
     A_TOGGLE_VOICE7,
     A_TOGGLE_VOICE8,
     A_TOGGLE_VOICE9,
+    A_TOGGLE_MASTER,
     A_TOGGLE_FILTER
 };
 
