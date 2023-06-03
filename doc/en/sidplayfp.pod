@@ -201,7 +201,7 @@ Mute/unmute voices 1-9.
 
 Toggle filter.
 
-=item p
+=item p/k
 
 Pause/unpause playback.
 
@@ -213,13 +213,17 @@ Quit player.
 
 Increase/reset playback speed.
 
-=item Left/Right Arrows
+=item Left/Right Arrows, 'j'/'l' keys
 
 Move to previous/next subtune.
 
 =item Home/End Arrows
 
 Go to first/last subtune.
+
+=item The 's' key
+
+Jump to a tune by specifying its index number.
 
 =back
 
@@ -277,6 +281,8 @@ Check the L<sidplayfp.ini(5)> documentation for configuration details
 and default search paths.
 
 =head1 Authors of this fork
+
+=over
 
 =item red M95
 
