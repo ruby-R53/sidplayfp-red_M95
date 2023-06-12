@@ -88,6 +88,7 @@ static char keytable[] = {
     '7',0,                     A_TOGGLE_VOICE7,
     '8',0,                     A_TOGGLE_VOICE8,
     '9',0,                     A_TOGGLE_VOICE9,
+    //'m',0,                     A_TOGGLE_MASTER,
     'f',0,                     A_TOGGLE_FILTER,
 
     // General Keys

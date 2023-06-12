@@ -58,8 +58,22 @@ const char *noteName[] = {
 };
 #endif
 
+const unsigned int tableWidth = 58;
+
 const char SID6581[] = "MOS6581";
 const char SID8580[] = "CSG8580";
+const char CIA6526[] = "MOS6526";
+const char CIA8521[] = "MOS8521";
+
+const char* getCia(SidConfig::cia_model_t model) {
+    switch (model) {
+    default:
+    case SidConfig::MOS6526:
+	return CIA6526;
+    case SidConfig::MOS8521:
+	return CIA8521;
+    }
+}
 
 const char* getModel(SidTuneInfo::model_t model) {
     switch (model) {
@@ -125,6 +139,7 @@ const char *ConsolePlayer::getNote(uint16_t freq) {
     return noteName[0];
 }
 #endif
+
 // Display console menu
 void ConsolePlayer::menu () {
     if (m_quietLevel > 1) {
@@ -142,7 +157,7 @@ void ConsolePlayer::menu () {
         cerr << '\x1b' << "[40m";  // Background black
         cerr << '\x1b' << "[2J";   // Clear screen
         cerr << '\x1b' << "[0;0H"; // Move cursor to 0,0
-	cerr << '\x1b' << "[?25l"; // hide the cursor
+        cerr << '\x1b' << "[?25l"; // hide the cursor
     }
 
     if (m_verboseLevel > 1) {
@@ -165,7 +180,7 @@ void ConsolePlayer::menu () {
     {
         string version;
         version.reserve(58);
-        version.append("Sidplayfp V" VERSION " - ").append(1, toupper(*info.name())).append(info.name() + 1).append(" V").append(info.version());
+        version.append("Sidplayfp v" VERSION " - ").append(1, toupper(*info.name())).append(info.name() + 1).append(" v").append(info.version());
         cerr << setw(58/2 + version.length()/2) << version << endl;
     }
 
@@ -214,7 +229,7 @@ void ConsolePlayer::menu () {
         consoleColour (green, true);
         cerr << " Filename(s)  : ";
         consoleColour (white, true);
-        cerr << trimString(tuneInfo->dataFileName(), 37) << endl;
+        cerr << trimString(tuneInfo->dataFileName(), (tableWidth - 17)) << endl;
         // Second file is only sometimes present
         if (tuneInfo->infoFileName()) {
             consoleTable  (tableMiddle);
@@ -247,8 +262,7 @@ void ConsolePlayer::menu () {
 
     {   // This will be the format used for playlists
         int i = 1;
-        if (!m_track.single)
-        {
+        if (!m_track.single) {
             i  = m_track.selected;
             i -= (m_track.first-1);
             if (i < 1)
@@ -256,8 +270,7 @@ void ConsolePlayer::menu () {
         }
         cerr << i << '/' << m_track.songs;
         cerr << " (tune " << tuneInfo->currentSong() << '/'
-             << tuneInfo->songs() << '['
-             << tuneInfo->startSong() << "])";
+             << tuneInfo->songs() << '[' << tuneInfo->startSong() << "])";
     }
 
     if (m_track.loop)
@@ -315,17 +328,17 @@ void ConsolePlayer::menu () {
         }
         if (tuneInfo->playAddr() == 0xffff)
             cerr << ", SYS = $" << setw(4) << setfill('0') << tuneInfo->initAddr()
-		 << ",";
+		         << ",";
         else
             cerr << ", INIT = $" << setw(4) << setfill('0') << tuneInfo->initAddr()
-		 << ",";
+		         << ",";
         cerr << endl;
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
         cerr << "              : ";
         consoleColour (white, false);
         cerr << "LOAD   = $" << setw(4) << setfill('0') << tuneInfo->loadAddr();
-        cerr << " - $"         << setw(4) << setfill('0') << tuneInfo->loadAddr() +
+        cerr << " - $"       << setw(4) << setfill('0') << tuneInfo->loadAddr() +
              (tuneInfo->c64dataLen() - 1);
         if (tuneInfo->playAddr() != 0xffff)
             cerr << ", PLAY = $" << setw(4) << setfill('0') << tuneInfo->playAddr();
@@ -336,11 +349,13 @@ void ConsolePlayer::menu () {
         consoleColour (yellow, true);
         cerr << " SID details  : ";
         consoleColour (white, false);
-        cerr << "Model  = ";
+        cerr << "SID #1 = $";
 #ifdef FEAT_NEW_TUNEINFO_API
-        cerr << getModel(tuneInfo->sidModel(0));
+        cerr << hex << tuneInfo->sidChipBase(0) << dec;
+        cerr << ", model: " << getModel(tuneInfo->sidModel(0));
 #else
-        cerr << getModel(tuneInfo->sidModel1());
+        cerr << hex << tuneInfo->sidChipBase1() << dec;
+        cerr << ", model: " << getModel(tuneInfo->sidModel1());
 #endif
         cerr << endl;
 #ifdef FEAT_NEW_TUNEINFO_API
@@ -353,11 +368,12 @@ void ConsolePlayer::menu () {
             consoleColour (yellow, true);
             cerr << "              : ";
             consoleColour (white, false);
+            cerr << "SID #2 = $";
 #ifdef FEAT_NEW_TUNEINFO_API
-            cerr << "SID #2 = $" << hex << tuneInfo->sidChipBase(1) << dec;
+            cerr << hex << tuneInfo->sidChipBase(1) << dec;
             cerr << ", model: " << getModel(tuneInfo->sidModel(1));
 #else
-            cerr << "SID #2 = $" << hex << tuneInfo->sidChipBase2() << dec;
+            cerr << hex << tuneInfo->sidChipBase2() << dec;
             cerr << ", model: " << getModel(tuneInfo->sidModel2());
 #endif
             cerr << endl;
@@ -376,15 +392,22 @@ void ConsolePlayer::menu () {
 
         consoleTable  (tableSeparator);
 
+	    consoleTable  (tableMiddle);
+	    consoleColour (yellow, true);
+        cerr << " CIA model    : ";
+	    consoleColour (white, false);
+	    cerr << getCia(m_engCfg.ciaModel);
+	    cerr << endl;
+
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
-        cerr << " Play speed   : ";
+        cerr << " Timing       : ";
         consoleColour (white, false);
         cerr << info.speedString() << endl;
 
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
-        cerr << " Play mode    : ";
+        cerr << " Channel mode : ";
         consoleColour (white, false);
         cerr << (info.channels() == 1 ? "Mono" : "Stereo") << endl;
 
@@ -392,13 +415,13 @@ void ConsolePlayer::menu () {
         consoleColour (yellow, true);
         cerr << " SID filter   : ";
         consoleColour (white, false);
-        cerr << (m_filter.enabled ? "Yes" : "No") << endl;
+        cerr << (m_filter.enabled ? "Enabled" : "Disabled") << endl;
 #ifdef FEAT_DIGIBOOST
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
         cerr << " DigiBoost    : ";
         consoleColour (white, false);
-        cerr << (m_engCfg.digiBoost ? "Yes" : "No") << endl;
+        cerr << (m_engCfg.digiBoost ? "Enabled" : "Disabled") << endl;
 #endif
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
@@ -468,7 +491,7 @@ void ConsolePlayer::menu () {
 
 #ifdef FEAT_REGS_DUMP_SID
     if (m_quietLevel >= 1) {
-	consoleTable (tableEnd);
+	    consoleTable (tableEnd);
         if (m_driver.file)
             cerr << "Creating audio file...";
         else
@@ -478,10 +501,10 @@ void ConsolePlayer::menu () {
     if (m_verboseLevel > 1) {
         consoleTable (tableSeparator);
         consoleTable (tableMiddle);
-	cerr << "          Note  PW         Control          Waveform(s)" << endl;
+	    cerr << "          Note  PW         Control          Waveform(s)" << endl;
         for (int i=0; i < tuneInfo->sidChips() * 6; i++) { // reserve space for each voice status
             consoleTable (tableMiddle); cerr << endl;
-	}
+	    }
     }
 #endif
     consoleTable (tableEnd);
@@ -505,7 +528,7 @@ void ConsolePlayer::refreshRegDump() {
     if (m_verboseLevel > 1) {
         const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
-        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor enough for redrawing the viewer lines
+        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor enough for updating the viewer lines
 
         for (int j=0; j < tuneInfo->sidChips(); j++) {
             uint8_t* registers = m_registers[j];
@@ -520,7 +543,7 @@ void ConsolePlayer::refreshRegDump() {
                 oldCtl[1] ^= registers[0x0b];
                 oldCtl[2] ^= registers[0x12];
 
-	        for (int i=0; i < 3; i++) {
+	            for (int i=0; i < 3; i++) {
                     consoleTable (tableMiddle);
                     consoleColour (red, true);
                     cerr << " Voice " << (j * 3 + i+1) << ":" << hex;
@@ -528,16 +551,16 @@ void ConsolePlayer::refreshRegDump() {
                     consoleColour (white, true);
                     cerr << " " << getNote(registers[0x00 + i * 0x07] | ((registers[0x01 + i * 0x07] & 0x0f) << 8));
 
-		    consoleColour (yellow, true);
+		            consoleColour (yellow, true);
                     cerr << "  $" << setw(3) << setfill('0')
-			 << (registers[0x02 + i * 0x07] | ((registers[0x03 + i * 0x07] & 0x0f) << 8)) << " ";
+		                 << (registers[0x02 + i * 0x07] | ((registers[0x03 + i * 0x07] & 0x0f) << 8)) << " ";
 
                     // gate changed ?
                     consoleColour((oldCtl[i] & 0x01) ? green : red, true);
                     // gate on ?
                     cerr << ((registers[0x04 + i * 0x07] & 0x01) ? " GATE" : " gate");
                     
-		    // sync changed ?
+		            // sync changed ?
                     consoleColour((oldCtl[i] & 0x02) ? green : red, true);
                     // sync on ?
                     cerr << ((registers[0x04 + i * 0x07] & 0x02) ? " SYNC" : " sync");
@@ -574,88 +597,88 @@ void ConsolePlayer::refreshRegDump() {
 		   
                     cerr << dec << endl;
                 }
-	    }
+	        }
             else {
-		for (int i=0; i < 3; i++) {
+                for (int i=0; i < 3; i++) {
                     consoleTable (tableMiddle); cerr << "???" << endl;
-		}
+		        }
             }
 	}
-        for (int j=0; j < tuneInfo->sidChips(); j++) {
-            uint8_t* registers = m_registers[j];
+    for (int j=0; j < tuneInfo->sidChips(); j++) {
+        uint8_t* registers = m_registers[j];
 
 	    consoleTable (tableSeparator);
 	    consoleTable (tableMiddle);
-            cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
-            consoleTable (tableMiddle);
+        cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
+        consoleTable (tableMiddle);
 
-            // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
+        // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
 	    consoleColour(red, true);
 	    cerr << "          %";
 	    for (int c=0; c < 4; c++) {
 	        uint8_t bitCnt[4];
 	                bitCnt[0] = 0x08;
 	              	bitCnt[1] = 0x04;
-    			bitCnt[2] = 0x02;
+                    bitCnt[2] = 0x02;
 	                bitCnt[3] = 0x01;
 
 	        cerr << ((registers[0x18] & bitCnt[c]) ? "1" : "0");
 	    }
 
-            // low pass on ?
+        // low pass on ?
 	    cerr << ((registers[0x18] & 0x10) ? "  LP" : "  lp");
 
 	    // band pass on ?
 	    cerr << ((registers[0x18] & 0x20) ? " BP" : " bp");
 
 	    // high pass on ?
-            cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
+        cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
 
 	    // voice 3 off on ?
-            cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
+        cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
 
 	    for (int c=0; c < 3; c++) {
-		uint8_t bitCnt[3];
-		        bitCnt[0] = 0x01;
-		        bitCnt[1] = 0x02;
-		        bitCnt[2] = 0x04;
+		    uint8_t bitCnt[3];
+		            bitCnt[0] = 0x01;
+		            bitCnt[1] = 0x02;
+		            bitCnt[2] = 0x04;
 
-                const char *voice[] = {"1","2","3",};
+            const char *voice[] = {"1","2","3",};
 	        cerr << ((registers[0x17] & bitCnt[c]) ? voice[c] : "-");
 	    }
 
-            // filter resonance, if filter's present, of course
-	    cerr << "    %";
+        // filter resonance display
+        cerr << "    %";
 	    for (int c=0; c < 4; c++) {
-                uint8_t bitCnt[4];
+            uint8_t bitCnt[4];
 	                bitCnt[0] = 0x80;
-	          	bitCnt[1] = 0x40;
-    			bitCnt[2] = 0x20;
-	               	bitCnt[3] = 0x10;
+	                bitCnt[1] = 0x40;
+    		        bitCnt[2] = 0x20;
+	           	    bitCnt[3] = 0x10;
 
-                cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
+            cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
 	    }
 	    cerr << "  %";
 	    int bitCnt[11];
 	        bitCnt[0]  = 0x400;
 	        bitCnt[1]  = 0x200;
-    	        bitCnt[2]  = 0x100;
+    	    bitCnt[2]  = 0x100;
 	        bitCnt[3]  = 0x080;
 	        bitCnt[4]  = 0x040;
-		bitCnt[5]  = 0x020;
-		bitCnt[6]  = 0x010;
-		bitCnt[7]  = 0x008;
+		    bitCnt[5]  = 0x020;
+		    bitCnt[6]  = 0x010;
+		    bitCnt[7]  = 0x008;
 	        bitCnt[8]  = 0x004;
-		bitCnt[9]  = 0x002;
-		bitCnt[10] = 0x001;
+		    bitCnt[9]  = 0x002;
+		    bitCnt[10] = 0x001;
 
 	    for (int c=0; c < 2; c++)
 	        cerr << ((registers[0x15] & bitCnt[c]) ? "1" : "0");
 	    for (int c=2; c < 11; c++)
-		cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
+	        cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
 
 	    cerr << dec << endl;
-	}
+	    }
         consoleTable (tableEnd);
     }
     else
@@ -695,8 +718,6 @@ void ConsolePlayer::consoleColour (player_colour_t colour, bool bold) {
 
 // Display menu outline
 void ConsolePlayer::consoleTable (player_table_t table) {
-    const unsigned int tableWidth = 58;
-
     consoleColour (white, true);
     switch (table) {
     case tableStart:
@@ -723,7 +744,6 @@ void ConsolePlayer::consoleTable (player_table_t table) {
              << (m_iniCfg.console ()).bottomRight;
         break;
     }
-
     // Move back to begining of row and skip first char
     cerr << "\n";
 }
@@ -731,7 +751,7 @@ void ConsolePlayer::consoleTable (player_table_t table) {
 // Restore Ansi Console to defaults
 void ConsolePlayer::consoleRestore () {
     if ((m_iniCfg.console ()).ansi) {
-	cerr << '\x1b' << "[?25h";
+	    cerr << '\x1b' << "[?25h";
         cerr << '\x1b' << "[0m";
     }
 }

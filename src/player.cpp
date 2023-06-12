@@ -375,7 +375,7 @@ bool ConsolePlayer::createOutput (OUTPUTS driver, const SidTuneInfo *tuneInfo) {
 }
 
 // Create the sid emulation
-bool ConsolePlayer::createSidEmu (SIDEMUS emu) {
+bool ConsolePlayer::createSidEmu(SIDEMUS emu) {
     // Remove old driver and emulation
     if (m_engCfg.sidEmulation) {
         sidbuilder *builder   = m_engCfg.sidEmulation;
@@ -564,7 +564,7 @@ bool ConsolePlayer::open (void) {
     return true;
 }
 
-void ConsolePlayer::close () {
+void ConsolePlayer::close() {
     m_engine.stop();
     if (m_state == playerExit) { // Natural finish
         if ((m_iniCfg.console ()).ansi)
@@ -594,7 +594,7 @@ void ConsolePlayer::close () {
 }
 
 // Flush any hardware sid fifos so all music is played
-void ConsolePlayer::emuflush () {
+void ConsolePlayer::emuflush() {
     switch (m_driver.sid) {
 #ifdef HAVE_SIDPLAYFP_BUILDERS_HARDSID_H
     case EMU_HARDSID:
@@ -667,7 +667,7 @@ bool ConsolePlayer::play() {
     return false;
 }
 
-void ConsolePlayer::stop () {
+void ConsolePlayer::stop() {
     m_state = playerStopped;
     m_engine.stop ();
 }
@@ -734,7 +734,7 @@ void ConsolePlayer::displayError (const char *error) {
 }
 
 // Keyboard handling
-void ConsolePlayer::decodeKeys () {
+void ConsolePlayer::decodeKeys() {
     do {
         const int action = keyboard_decode ();
         if (action == A_INVALID)
@@ -752,8 +752,7 @@ void ConsolePlayer::decodeKeys () {
 
         case A_LEFT_ARROW:
             m_state = playerFastRestart;
-            if (!m_track.single) { // now you can just press the 'r' key to replay rather than
-				   // worrying about the 4 sec timeout :)
+            if (!m_track.single) { // no timeout, just punch the 'r' key and that's it ;)
 #ifdef FEAT_NEW_SONLEGTH_DB
     const uint_least32_t milliseconds = m_engine.timeMs();
 #else
@@ -763,7 +762,7 @@ void ConsolePlayer::decodeKeys () {
                 if (m_track.selected < 1)
                     m_track.selected = m_track.songs;
             }
-	break;
+	    break;
 
         case A_REPLAY:
             m_state = playerFastRestart;
@@ -857,27 +856,27 @@ void ConsolePlayer::decodeKeys () {
             m_engCfg.sidEmulation->filter(m_filter.enabled);
         break;
 
-	case A_SEARCH:
-	    cerr << "\x1b[2K\r";
+	    case A_SEARCH:
+	        cerr << "\x1b[2K\r";
             cerr << "Jump to: ";
-	    keyboard_disable_raw();
-	    std::cin >> m_track.query;
-	    keyboard_enable_raw();
-	    cerr << "\x1b[2K\r" << "\x1b[1A";
-	    if (m_track.query <= m_track.songs) {
-	        m_state = playerFastRestart;
+	        keyboard_disable_raw();
+	        std::cin >> m_track.query;
+	        keyboard_enable_raw();
+	        cerr << "\x1b[2K\r" << "\x1b[1A";
+	        if (m_track.query <= m_track.songs) {
+	            m_state = playerFastRestart;
                 m_track.selected = m_track.query;
-	    }
-	    else {
-	        cerr << "Tune #" << m_track.query << " not found";
-	        sleep(1);
-	    }
-	    break;
+	        }
+	        else {
+	            cerr << "Tune #" << m_track.query << " not found";
+	            sleep(1);
+	        }
+	        break;
 
-        case A_QUIT:
-            m_state = playerFastExit;
-            return;
-        break;
-        }
+            case A_QUIT:
+                m_state = playerFastExit;
+                return;
+            break;
+            }
     } while (_kbhit ());
 }
