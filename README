@@ -34,6 +34,17 @@ changelog #1 - june 3, 2023:
 
 -some irrelevant changes on the appearance, like changing the default 'junctionLeft' and 'junctionRight' options to ':'. looks a bit prettier to me, i guess.
 
+changelog #2 - june 12, 2023:
+-some more irrelevant changes to the appearance:
+ -now the cia chip model is displayed!
+ -now the sid #1 has its address displayed as well. kinda useless, i know, but it fits better with multi-sid tunes, at least to me.
+ -changes on the wording:
+  -"Play speed" -> "Timing";
+  -"Play mode" -> "Channel mode";
+  -the "Yes" and "No" like in "SID filter" -> "Enabled"/"Disabled"
+ -the "v" on the header, prefix for the version number, is now in lower case.
+ -i forgot to adapt the file name size limit to the new screen width xd
+
 -current plans:
  -some complicated stuff that i probably won't be able to do now:
   -add an "open" keybind, so you can load a different file while sidplayfp still runs;
