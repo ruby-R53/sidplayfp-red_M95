@@ -62,6 +62,8 @@ const unsigned int tableWidth = 58;
 
 const char SID6581[] = "MOS6581";
 const char SID8580[] = "CSG8580";
+
+#ifdef FEAT_CONFIG_CIAMODEL
 const char CIA6526[] = "MOS6526";
 const char CIA8521[] = "MOS8521";
 
@@ -74,6 +76,7 @@ const char* getCia(SidConfig::cia_model_t model) {
 	return CIA8521;
     }
 }
+#endif
 
 const char* getModel(SidTuneInfo::model_t model) {
     switch (model) {
@@ -154,7 +157,7 @@ void ConsolePlayer::menu () {
     const SidTuneInfo *tuneInfo = m_tune.getInfo();
 
     if ((m_iniCfg.console ()).ansi) {
-        cerr << '\x1b' << "[40m";  // Background black
+        cerr << '\x1b' << "[40m";  // Black background
         cerr << '\x1b' << "[2J";   // Clear screen
         cerr << '\x1b' << "[0;0H"; // Move cursor to 0,0
         cerr << '\x1b' << "[?25l"; // hide the cursor
@@ -179,9 +182,9 @@ void ConsolePlayer::menu () {
     consoleColour (white, false);
     {
         string version;
-        version.reserve(58);
+        version.reserve(tableWidth);
         version.append("Sidplayfp v" VERSION " - ").append(1, toupper(*info.name())).append(info.name() + 1).append(" v").append(info.version());
-        cerr << setw(58/2 + version.length()/2) << version << endl;
+        cerr << setw(tableWidth/2 + version.length()/2) << version << endl;
     }
 
     const unsigned int n = tuneInfo->numberOfInfoStrings();
@@ -198,12 +201,12 @@ void ConsolePlayer::menu () {
         if (n>1) {
             consoleTable  (tableMiddle);
             consoleColour (cyan, true);
-            cerr << " Author       : ";
+            cerr << " Composer(s)  : ";
             consoleColour (magenta, true);
             cerr << codeset.convert(tuneInfo->infoString(1)) << endl;
             consoleTable  (tableMiddle);
             consoleColour (cyan, true);
-            cerr << " Released     : ";
+            cerr << " Release      : ";
             consoleColour (magenta, true);
             cerr << codeset.convert(tuneInfo->infoString(2)) << endl;
         }
@@ -281,14 +284,14 @@ void ConsolePlayer::menu () {
     if (m_verboseLevel) {
         consoleTable  (tableMiddle);
         consoleColour (green, true);
-        cerr << " Song speed   : ";
+        cerr << " Song clock   : ";
         consoleColour (white, true);
         cerr << getClock(tuneInfo->clockSpeed()) << endl;
     }
 
     consoleTable  (tableMiddle);
     consoleColour (green, true);
-    cerr << " Song length  : ";
+    cerr << " Duration     : ";
     consoleColour (white, true);
     if (m_timer.stop) {
         const uint_least32_t seconds = m_timer.stop / 1000;
@@ -343,7 +346,6 @@ void ConsolePlayer::menu () {
         if (tuneInfo->playAddr() != 0xffff)
             cerr << ", PLAY = $" << setw(4) << setfill('0') << tuneInfo->playAddr();
         cerr << dec << endl;
-        cerr.unsetf(std::ios::uppercase);
 
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
@@ -392,13 +394,14 @@ void ConsolePlayer::menu () {
 
         consoleTable  (tableSeparator);
 
+#ifdef FEAT_CONFIG_CIAMODEL
 	    consoleTable  (tableMiddle);
 	    consoleColour (yellow, true);
         cerr << " CIA model    : ";
 	    consoleColour (white, false);
 	    cerr << getCia(m_engCfg.ciaModel);
 	    cerr << endl;
-
+#endif
         consoleTable  (tableMiddle);
         consoleColour (yellow, true);
         cerr << " Timing       : ";
@@ -501,8 +504,10 @@ void ConsolePlayer::menu () {
     if (m_verboseLevel > 1) {
         consoleTable (tableSeparator);
         consoleTable (tableMiddle);
+        int movLines = (m_verboseLevel > 2) ? (tuneInfo->sidChips() * 6) : (tuneInfo->sidChips() * 3);
 	    cerr << "          Note  PW         Control          Waveform(s)" << endl;
-        for (int i=0; i < tuneInfo->sidChips() * 6; i++) { // reserve space for each voice status
+
+        for (int i=0; i < movLines; i++) { // reserve space for sid status
             consoleTable (tableMiddle); cerr << endl;
 	    }
     }
@@ -510,7 +515,7 @@ void ConsolePlayer::menu () {
     consoleTable (tableEnd);
 
     if (m_driver.file)
-        cerr << "Creating audio file - ";
+        cerr << "Creating audio file: ";
     else
         cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S] Time: ";
 
@@ -526,9 +531,12 @@ void ConsolePlayer::refreshRegDump() {
 	return;
 #ifdef FEAT_REGS_DUMP_SID
     if (m_verboseLevel > 1) {
+        cerr.unsetf(std::ios::uppercase);
         const SidTuneInfo *tuneInfo = m_tune.getInfo();
+        int movLines = (m_verboseLevel > 2) ? (tuneInfo->sidChips() * 6 + 1) : (tuneInfo->sidChips() * 3 + 1);
 
-        cerr << "\x1b[" << tuneInfo->sidChips() * 6 + 1 << "A\r"; // Moves cursor enough for updating the viewer lines
+        // Moves cursor enough for updating the viewer lines, depending on m_verboseLevel
+        cerr << "\x1b[" << movLines << "A\r"; 
 
         for (int j=0; j < tuneInfo->sidChips(); j++) {
             uint8_t* registers = m_registers[j];
@@ -545,7 +553,7 @@ void ConsolePlayer::refreshRegDump() {
 
 	            for (int i=0; i < 3; i++) {
                     consoleTable (tableMiddle);
-                    consoleColour (red, true);
+                    consoleColour(red, true);
                     cerr << " Voice " << (j * 3 + i+1) << ":" << hex;
 
                     consoleColour (white, true);
@@ -596,6 +604,7 @@ void ConsolePlayer::refreshRegDump() {
                     cerr << ((registers[0x04 + i * 0x07] & 0x80) ? " NOI" : " ___");
 		   
                     cerr << dec << endl;
+
                 }
 	        }
             else {
@@ -604,80 +613,83 @@ void ConsolePlayer::refreshRegDump() {
 		        }
             }
 	}
-    for (int j=0; j < tuneInfo->sidChips(); j++) {
-        uint8_t* registers = m_registers[j];
+    if (m_verboseLevel <= 2)
+        consoleTable(tableEnd);
+    if (m_verboseLevel > 2) {
+        for (int j=0; j < tuneInfo->sidChips(); j++) {
+            uint8_t* registers = m_registers[j];
 
-	    consoleTable (tableSeparator);
-	    consoleTable (tableMiddle);
-        cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
-        consoleTable (tableMiddle);
+	        consoleTable (tableSeparator);
+	        consoleTable (tableMiddle);
+            cerr << " SID #" << (j + 1) << ": M. Vol.   Filters   F. Chn. F. Res.    F. Cut." << endl;
+            consoleTable (tableMiddle);
 
-        // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
-	    consoleColour(red, true);
-	    cerr << "          %";
-	    for (int c=0; c < 4; c++) {
-	        uint8_t bitCnt[4];
-	                bitCnt[0] = 0x08;
-	              	bitCnt[1] = 0x04;
-                    bitCnt[2] = 0x02;
-	                bitCnt[3] = 0x01;
+            // binary volume meter, helps partially visualizing samples. yeah, i know it's a quite weird idea
+	        consoleColour(red, true);
+	        cerr << "          %";
+	        for (int c=0; c < 4; c++) {
+	            uint8_t bitCnt[4];
+	                    bitCnt[0] = 0x08;
+	              	    bitCnt[1] = 0x04;
+                        bitCnt[2] = 0x02;
+	                    bitCnt[3] = 0x01;
 
-	        cerr << ((registers[0x18] & bitCnt[c]) ? "1" : "0");
-	    }
+	            cerr << ((registers[0x18] & bitCnt[c]) ? "1" : "0");
+	        }
 
-        // low pass on ?
-	    cerr << ((registers[0x18] & 0x10) ? "  LP" : "  lp");
+            // low pass on ?
+	        cerr << ((registers[0x18] & 0x10) ? "  LP" : "  lp");
 
-	    // band pass on ?
-	    cerr << ((registers[0x18] & 0x20) ? " BP" : " bp");
+	        // band pass on ?
+	        cerr << ((registers[0x18] & 0x20) ? " BP" : " bp");
 
-	    // high pass on ?
-        cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
+	        // high pass on ?
+            cerr << ((registers[0x18] & 0x40) ? " HP" : " hp");
 
-	    // voice 3 off on ?
-        cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
+	        // voice 3 off on ?
+            cerr << ((registers[0x18] & 0x80) ? " 3O   " : " 3o   ");
 
-	    for (int c=0; c < 3; c++) {
-		    uint8_t bitCnt[3];
-		            bitCnt[0] = 0x01;
-		            bitCnt[1] = 0x02;
-		            bitCnt[2] = 0x04;
+	        for (int c=0; c < 3; c++) {
+		        uint8_t bitCnt[3];
+		                bitCnt[0] = 0x01;
+		                bitCnt[1] = 0x02;
+		                bitCnt[2] = 0x04;
 
-            const char *voice[] = {"1","2","3",};
-	        cerr << ((registers[0x17] & bitCnt[c]) ? voice[c] : "-");
-	    }
+                const char *voice[] = {"1","2","3",};
+	            cerr << ((registers[0x17] & bitCnt[c]) ? voice[c] : "-");
+	        }
 
-        // filter resonance display
-        cerr << "    %";
-	    for (int c=0; c < 4; c++) {
-            uint8_t bitCnt[4];
-	                bitCnt[0] = 0x80;
-	                bitCnt[1] = 0x40;
-    		        bitCnt[2] = 0x20;
-	           	    bitCnt[3] = 0x10;
+            // filter resonance display
+            cerr << "    %";
+	        for (int c=0; c < 4; c++) {
+                uint8_t bitCnt[4];
+	                    bitCnt[0] = 0x80;
+	                    bitCnt[1] = 0x40;
+    		            bitCnt[2] = 0x20;
+	           	        bitCnt[3] = 0x10;
 
-            cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
-	    }
-	    cerr << "  %";
-	    int bitCnt[11];
-	        bitCnt[0]  = 0x400;
-	        bitCnt[1]  = 0x200;
-    	    bitCnt[2]  = 0x100;
-	        bitCnt[3]  = 0x080;
-	        bitCnt[4]  = 0x040;
-		    bitCnt[5]  = 0x020;
-		    bitCnt[6]  = 0x010;
-		    bitCnt[7]  = 0x008;
-	        bitCnt[8]  = 0x004;
-		    bitCnt[9]  = 0x002;
-		    bitCnt[10] = 0x001;
+                cerr << ((registers[0x17] & bitCnt[c]) ? "1" : "0");
+	        }
+	        cerr << "  %";
+	        int bitCnt[11];
+	            bitCnt[0]  = 0x400;
+	            bitCnt[1]  = 0x200;
+    	        bitCnt[2]  = 0x100;
+	            bitCnt[3]  = 0x080;
+	            bitCnt[4]  = 0x040;
+		        bitCnt[5]  = 0x020;
+		        bitCnt[6]  = 0x010;
+		        bitCnt[7]  = 0x008;
+	            bitCnt[8]  = 0x004;
+		        bitCnt[9]  = 0x002;
+		        bitCnt[10] = 0x001;
 
-	    for (int c=0; c < 2; c++)
-	        cerr << ((registers[0x15] & bitCnt[c]) ? "1" : "0");
-	    for (int c=2; c < 11; c++)
-	        cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
+	        for (int c=0; c < 2; c++)
+	            cerr << ((registers[0x15] & bitCnt[c]) ? "1" : "0");
+	        for (int c=2; c < 11; c++)
+	            cerr << ((registers[0x16] & bitCnt[c]) ? "1" : "0");
 
-	    cerr << dec << endl;
+	        cerr << dec << endl;
 	    }
         consoleTable (tableEnd);
     }
@@ -691,6 +703,7 @@ void ConsolePlayer::refreshRegDump() {
         cerr << "Prev. [J] Pause [K] Next [L] Stop [Q] Search [S] Time: ";
 
     cerr << flush;
+    }
 }
 
 // Set colour of text on console
@@ -699,20 +712,18 @@ void ConsolePlayer::consoleColour (player_colour_t colour, bool bold) {
         const char *mode = "";
 
         switch (colour) {
-        case black:   mode = "30"; break;
-        case red:     mode = "31"; break;
-        case green:   mode = "32"; break;
-        case yellow:  mode = "33"; break;
-        case blue:    mode = "34"; break;
-        case magenta: mode = "35"; break;
-        case cyan:    mode = "36"; break;
-        case white:   mode = "37"; break;
+            case black:   mode = "30"; break;
+            case red:     mode = "31"; break;
+            case green:   mode = "32"; break;
+            case yellow:  mode = "33"; break;
+            case blue:    mode = "34"; break;
+            case magenta: mode = "35"; break;
+            case cyan:    mode = "36"; break;
+            case white:   mode = "37"; break;
         }
+        const char* bold_c = (bold) ? "1" : "0";
 
-        if (bold)
-            cerr << '\x1b' << "[1;40;" << mode << 'm';
-        else
-            cerr << '\x1b' << "[0;40;" << mode << 'm';
+        cerr << '\x1b' << "[" << bold_c << ";40;" << mode << 'm';
     }
 }
 

@@ -180,14 +180,12 @@ int ConsolePlayer::args(int argc, const char *argv[]) {
                 if (!parseTime (&argv[i][2], m_timer.start))
                     err = true;
             }
-            else if (strncmp(&argv[i][1], "ds", 2) == 0) { // Override sidTune
-												  // and enable SID #2
+            else if (strncmp(&argv[i][1], "ds", 2) == 0) { // Override sidTune, and enable SID #2
                 if (!parseAddress (&argv[i][3], m_engCfg.secondSidAddress))
                     err = true;
             }
 #ifdef FEAT_THIRD_SID
-            else if (strncmp(&argv[i][1], "ts", 2) == 0) { // Override sidTune
-		                                                                                  // and enable SID #3
+            else if (strncmp(&argv[i][1], "ts", 2) == 0) { // Override sidTune, and enable SID #3
                 if (!parseAddress (&argv[i][3], m_engCfg.thirdSidAddress))
                     err = true;
             }
@@ -536,11 +534,10 @@ void ConsolePlayer::displayArgs (const char *arg) {
         << " --help-debug debug help menu" << endl
         << " -b<num>      set start time in [mins:]secs[.milli] format (default: 0)" << endl
 
-        << " -f<num>      set frequency in Hz (default: "
-        << SidConfig::DEFAULT_SAMPLING_FREQ << ")" << endl
-        << " -d=<addr>    set second SID address (e.g. -d=0xd420)" << endl
+        << " -f<num>      set frequency in Hz (default: " << SidConfig::DEFAULT_SAMPLING_FREQ << ")" << endl
+        << " -ds<addr>    set second SID address (e.g. -ds0xd420)" << endl
 #ifdef FEAT_THIRD_SID
-        << " -t=<addr>    set third SID address (e.g. -t=0xd440)" << endl
+        << " -ts<addr>    set third SID address (e.g. -ts0xd440)" << endl
 #endif
         << " -u<num>      mute voice <num> (e.g. -u1 -u2)" << endl
 

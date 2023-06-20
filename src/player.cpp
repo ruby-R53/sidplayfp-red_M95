@@ -721,7 +721,6 @@ void ConsolePlayer::updateDisplay() {
     refreshRegDump();
 
     if (!m_quietLevel && (seconds != (m_timer.current / 1000))) {
-        //cerr << "\b\b\b\b\b";
         cerr << std::setw(2) << std::setfill('0')
              << ((seconds / 60) % 100) << ':' << std::setw(2)
              << std::setfill('0') << (seconds % 60) << std::flush;

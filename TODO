@@ -6,5 +6,8 @@ original sidplayfp:
 * add playlist support (pls)
 * fix building on Cygwin
 
-me:
-* make the extra filter viewers available only for verbosity levels > 2.
+my sidplayfp:
+* add an "open" keybind, so you can load a different file while sidplayfp still runs;
+* keep playing while suspended, giving you nice background music;
+* add an "infinite" keybind, so you can choose a specific tune to loop, rather than giving the same setting to all tunes at once.
+* add a command line option for filter curve. some tunes sound better with different filter curve levels, and having to change the configuration file just for that single parameter for that single file is not very optimal.

@@ -45,11 +45,12 @@ changelog #2 - june 12, 2023:
  -the "v" on the header, prefix for the version number, is now in lower case.
  -i forgot to adapt the file name size limit to the new screen width xd
 
--current plans:
- -some complicated stuff that i probably won't be able to do now:
-  -add an "open" keybind, so you can load a different file while sidplayfp still runs;
-  -keep playing while suspended, giving you nice background music;
-  -add an "infinite" keybind, so you can choose a specific tune to loop, rather than giving the same setting to all tunes at once.
+changelog #3 - june 15, 2023:
+-finally, the filter view is now exclusive for >=3 verbosity levels!
+-not really related to sidplayfp itself, but: to make stuff more organized, my plans are not in 'TODO'. dunno why i didn't do that before xd
+
+changelog #4 - june 20, 2023:
+-i'll start posting the changelogs to a dedicated file from now on, should've done that before as well.
 
 "sidplayfp
 =========
