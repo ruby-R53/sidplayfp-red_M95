@@ -15,6 +15,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+// to be modified by red M95 ;)
 
 #ifndef INIHANDLER_H
 #define INIHANDLER_H
@@ -24,8 +25,7 @@
 
 #include "types.h"
 
-class iniHandler
-{
+class iniHandler {
 private:
     typedef std::pair<SID_STRING, SID_STRING> stringPair_t;
     typedef std::vector<stringPair_t> keys_t;
@@ -37,8 +37,7 @@ private:
 
 private:
     template<class T>
-    class compare
-    {
+    class compare {
     private:
         SID_STRING s;
 
@@ -73,7 +72,7 @@ public:
     bool write(const TCHAR *fName);
     void close();
 
-    bool setSection(const TCHAR *section);
+    bool  setSection(const TCHAR *section);
     const TCHAR *getValue(const TCHAR *key) const;
 
     void addSection(const TCHAR *section);

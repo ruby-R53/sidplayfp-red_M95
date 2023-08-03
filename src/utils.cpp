@@ -17,24 +17,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// to be modified by red M95 ;)
 
 #include "utils.h"
 
 #include <cstdlib>
 
 #ifdef _WIN32
-#  include <windows.h>
-#  include <shlobj.h>
-#  include <shlwapi.h>
+# include <windows.h>
+# include <shlobj.h>
+# include <shlwapi.h>
 
 #ifdef UNICODE
-#  define _tgetenv _wgetenv
+# define _tgetenv _wgetenv
 #else
-#  define _tgetenv getenv
+# define _tgetenv getenv
 #endif
 
-SID_STRING utils::getExecPath()
-{
+SID_STRING utils::getExecPath() {
     HMODULE hModule = GetModuleHandle(NULL);
     TCHAR path[MAX_PATH];
     GetModuleFileName(hModule, path, MAX_PATH);
@@ -42,21 +42,18 @@ SID_STRING utils::getExecPath()
     return path;
 }
 
-SID_STRING utils::getPath()
-{
+SID_STRING utils::getPath() {
     SID_STRING returnPath;
 
     TCHAR szPath[MAX_PATH];
 
-    if (SHGetFolderPath(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL, 0, szPath)!=S_OK)
-    {
+    if (SHGetFolderPath(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL, 0, szPath)!=S_OK) {
         TCHAR *path = _tgetenv(TEXT("USERPROFILE"));
         if (!path)
             throw error();
         returnPath.append(path).append(TEXT("\\Application Data"));
     }
-    else
-    {
+    else {
         returnPath.append(szPath);
     }
 
@@ -69,13 +66,11 @@ SID_STRING utils::getConfigPath() { return getPath(); }
 
 #else
 
-SID_STRING utils::getPath(const char* id, const char* def)
-{
+SID_STRING utils::getPath(const char* id, const char* def) {
     SID_STRING returnPath;
 
     char *path = getenv(id);
-    if (!path)
-    {
+    if (!path) {
         path = getenv("HOME");
         if (!path)
             throw error();

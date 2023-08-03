@@ -37,7 +37,7 @@ using std::endl;
 #include <stdlib.h>
 
 #ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+# include <unistd.h>
 #endif
 
 #include "utils.h"
@@ -172,7 +172,7 @@ ConsolePlayer::ConsolePlayer (const char * const name) :
     m_driver.device  = NULL;
     m_driver.sid     = EMU_RESIDFP;
     m_timer.start    = 0;
-    m_timer.length   = 0; // FOREVER
+    m_timer.length   = 0; // Infinite
     m_timer.valid    = false;
     m_timer.starting = false;
     m_track.first    = 0;
@@ -183,8 +183,8 @@ ConsolePlayer::ConsolePlayer (const char * const name) :
     m_speed.max      = 32;
 
     // Read default configuration
-    m_iniCfg.read ();
-    m_engCfg = m_engine.config ();
+    m_iniCfg.read();
+    m_engCfg = m_engine.config();
 
     {   // Load ini settings
         IniConfig::audio_section     audio     = m_iniCfg.audio();
@@ -209,7 +209,7 @@ ConsolePlayer::ConsolePlayer (const char * const name) :
         m_filter.filterCurve8580 = emulation.filterCurve8580;
 
         if (emulation.powerOnDelay >= 0)
-            m_engCfg.powerOnDelay    = emulation.powerOnDelay;
+            m_engCfg.powerOnDelay   = emulation.powerOnDelay;
 
         if (!emulation.engine.empty()) {
             if (emulation.engine.compare(TEXT("RESIDFP")) == 0) {
@@ -236,14 +236,14 @@ ConsolePlayer::ConsolePlayer (const char * const name) :
         }
     }
 
-    m_verboseLevel = (m_iniCfg.sidplay2()).verboseLevel;
+    m_verboseLevel = (m_iniCfg.sidplayfp()).verboseLevel;
 
-    createOutput (OUT_NULL, nullptr);
-    createSidEmu (EMU_NONE);
+    createOutput(OUT_NULL, nullptr);
+    createSidEmu(EMU_NONE);
 
-    uint8_t *kernalRom = loadRom((m_iniCfg.sidplay2()).kernalRom, 8192, TEXT("kernal"));
-    uint8_t *basicRom = loadRom((m_iniCfg.sidplay2()).basicRom, 8192, TEXT("basic"));
-    uint8_t *chargenRom = loadRom((m_iniCfg.sidplay2()).chargenRom, 4096, TEXT("chargen"));
+    uint8_t *kernalRom  = loadRom((m_iniCfg.sidplayfp()).kernalRom, 8192, TEXT("kernal"));
+    uint8_t *basicRom   = loadRom((m_iniCfg.sidplayfp()).basicRom, 8192, TEXT("basic"));
+    uint8_t *chargenRom = loadRom((m_iniCfg.sidplayfp()).chargenRom, 4096, TEXT("chargen"));
     m_engine.setRoms(kernalRom, basicRom, chargenRom);
     delete [] kernalRom;
     delete [] basicRom;
@@ -367,8 +367,7 @@ bool ConsolePlayer::createOutput (OUTPUTS driver, const SidTuneInfo *tuneInfo) {
         m_engCfg.playback = SidConfig::STEREO;
         break;
     default:
-        cerr << m_name << ": " << "ERROR: " << m_channels
-             << " audio channels not supported" << endl;
+        cerr << m_name << ": " << "ERROR: " << m_channels << " channels unsupported!" << endl;
         return false;
     }
     return true;
@@ -454,21 +453,21 @@ bool ConsolePlayer::createSidEmu(SIDEMUS emu) {
 #endif // HAVE_SIDPLAYFP_BUILDERS_EXSID_H
 
     default:
-        // Emulation Not yet handled
-        // This default case results in the default
+        // Emulation not yet handled,
+        // this default case results in the default
         // emulation
         break;
     }
 
     if (!m_engCfg.sidEmulation) {
-        if (emu > EMU_DEFAULT) { // No sid emulation?
+        if (emu > EMU_DEFAULT) { // No SID emulation?
             displayError (ERR_NOT_ENOUGH_MEMORY);
             return false;
         }
     }
 
     if (m_engCfg.sidEmulation) {
-        /* set up SID filter. HardSID just ignores call with def. */
+        // set up SID filter. HardSID just ignores call with def.
         m_engCfg.sidEmulation->filter(m_filter.enabled);
     }
     return true;
@@ -506,8 +505,8 @@ bool ConsolePlayer::open (void) {
         return false;
 
     // Configure engine with settings
-    if (!m_engine.config(m_engCfg)) {    // Config failed
-        displayError(m_engine.error ());
+    if (!m_engine.config(m_engCfg)) { // Config failed
+        displayError(m_engine.error());
         return false;
     }
 #ifdef FEAT_REGS_DUMP_SID
@@ -548,13 +547,13 @@ bool ConsolePlayer::open (void) {
         if (m_timer.stop > 0)
             m_timer.stop += m_timer.start;
     }
-    else { // Check to make start time dosen't exceed end
+    else { // Check to make start time not exceed length
         if ((m_timer.stop != 0) && (m_timer.start >= m_timer.stop)) {
             displayError ("ERROR: start time exceeds song length!");
             return false;
         }
     }
-    m_timer.current = ~0;
+    m_timer.current  = ~0;
     m_timer.starting = true;
     m_state = playerRunning;
 
@@ -569,22 +568,22 @@ void ConsolePlayer::close() {
     if (m_state == playerExit) { // Natural finish
         if ((m_iniCfg.console ()).ansi)
 	    cerr << '\x1b' << "[?25h";
-        emuflush ();
+        emuflush();
         if (m_driver.file)
             cerr << (char) 7;    // Bell
     }
     else // Destroy buffers
-	if ((m_iniCfg.console ()).ansi)
+	if ((m_iniCfg.console()).ansi)
 	    cerr << '\x1b' << "[?25h";
         m_driver.selected->reset ();
 
     // Shutdown drivers, etc
-    createOutput    (OUT_NULL, nullptr);
-    createSidEmu    (EMU_NONE);
-    m_engine.load   (nullptr);
-    m_engine.config (m_engCfg);
+    createOutput   (OUT_NULL, nullptr);
+    createSidEmu   (EMU_NONE);
+    m_engine.load  (nullptr);
+    m_engine.config(m_engCfg);
 
-    if (m_quietLevel < 3) {             // Correctly leave ansi mode and get prompt to 
+    if (m_quietLevel < 3) {             // Correctly leave ANSI mode and get prompt to 
         if ((m_iniCfg.console ()).ansi) // end up in a suitable location
             cerr << '\x1b' << "[0m";
 #ifndef _WIN32
@@ -637,12 +636,12 @@ bool ConsolePlayer::play() {
         // on music buffer sizes). Don't do this for high quiet levels
         // as chances are we are under remote control.
         if ((m_quietLevel < 3) && _kbhit ())
-            decodeKeys ();
+            decodeKeys();
         return true;
     default:
         if (m_quietLevel < 3)
             cerr << endl;
-        m_engine.stop ();
+        m_engine.stop();
 #if HAVE_TSID == 1
         if (m_tsid) {
             m_tsid.addTime((int)(m_timer.current/1000), m_track.selected, m_filename);
@@ -659,7 +658,7 @@ bool ConsolePlayer::play() {
             if (length < 0)
                 length = 0;
             m_tsid.addTime(md5, m_filename, (uint)(m_timer.current/1000),
-                           m_track.selected, (uint)(length/1000));
+                           m_track.selected,(uint)(length/1000));
         }
 #endif
         break;
@@ -701,7 +700,7 @@ uint_least32_t ConsolePlayer::getBufSize() {
     }
     else {
         uint_least32_t remaining = m_timer.stop - m_timer.current;
-        uint_least32_t bufSize = remaining * m_driver.cfg.bytesPerMillis();
+        uint_least32_t bufSize   = remaining * m_driver.cfg.bytesPerMillis();
         if (bufSize < m_driver.cfg.bufSize)
             return bufSize;
     }
@@ -721,6 +720,8 @@ void ConsolePlayer::updateDisplay() {
     refreshRegDump();
 
     if (!m_quietLevel && (seconds != (m_timer.current / 1000))) {
+        if (m_verboseLevel < 2)
+            cerr << "\b\b\b\b\b";
         cerr << std::setw(2) << std::setfill('0')
              << ((seconds / 60) % 100) << ':' << std::setw(2)
              << std::setfill('0') << (seconds % 60) << std::flush;
@@ -752,11 +753,6 @@ void ConsolePlayer::decodeKeys() {
         case A_LEFT_ARROW:
             m_state = playerFastRestart;
             if (!m_track.single) { // no timeout, just punch the 'r' key and that's it ;)
-#ifdef FEAT_NEW_SONLEGTH_DB
-    const uint_least32_t milliseconds = m_engine.timeMs();
-#else
-    const uint_least32_t milliseconds = m_engine.time() * 1000;
-#endif
                 m_track.selected--;
                 if (m_track.selected < 1)
                     m_track.selected = m_track.songs;
@@ -855,9 +851,9 @@ void ConsolePlayer::decodeKeys() {
             m_engCfg.sidEmulation->filter(m_filter.enabled);
         break;
 
-	    case A_SEARCH:
+	    case A_GOTO:
 	        cerr << "\x1b[2K\r";
-            cerr << "Jump to: ";
+            cerr << "Go to: ";
 	        keyboard_disable_raw();
 	        std::cin >> m_track.query;
 	        keyboard_enable_raw();

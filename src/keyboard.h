@@ -21,7 +21,7 @@
 // slightly modified by red M95 ;)
 
 #ifdef _WIN32
-#  include <conio.h>
+# include <conio.h>
 #else
     int _kbhit (void);
 #endif
@@ -44,7 +44,7 @@ enum {
     A_END,
     A_PAUSED,
     A_QUIT,
-    A_SEARCH,
+    A_GOTO,
     A_REPLAY,
 
     /* Debug */
@@ -57,12 +57,12 @@ enum {
     A_TOGGLE_VOICE7,
     A_TOGGLE_VOICE8,
     A_TOGGLE_VOICE9,
-    //A_TOGGLE_MASTER,
+//  A_TOGGLE_MASTER,
     A_TOGGLE_FILTER
 };
 
-int  keyboard_decode      ();
+int  keyboard_decode();
 #ifndef _WIN32
-void keyboard_enable_raw  ();
-void keyboard_disable_raw ();
+void keyboard_enable_raw();
+void keyboard_disable_raw();
 #endif

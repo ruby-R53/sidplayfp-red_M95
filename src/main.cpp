@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// to be modified by red M95 ;)
 
 #include "player.h"
 
@@ -31,17 +32,15 @@ using std::endl;
 
 #include "keyboard.h"
 
-
 // Function prototypes
 static void sighandler (int signum);
 static ConsolePlayer *g_player;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     ConsolePlayer player(argv[0]);
     g_player = &player;
 
-    {// Decode the command line args
+    { // Decode the command line args
         const int ret = player.args (argc - 1, const_cast<const char**>(argv + 1));
         if (ret < 0)
             goto main_error;
@@ -50,39 +49,36 @@ int main(int argc, char *argv[])
     }
 
 main_restart:
-    if (!player.open ())
+    if (!player.open())
         goto main_error;
 
     // Install signal error handlers
     if ((signal (SIGINT,  &sighandler) == SIG_ERR)
      || (signal (SIGABRT, &sighandler) == SIG_ERR)
-     || (signal (SIGTERM, &sighandler) == SIG_ERR))
-    {
+     || (signal (SIGTERM, &sighandler) == SIG_ERR)) {
         displayError(argv[0], ERR_SIGHANDLER);
         goto main_error;
     }
 
 #ifndef _WIN32
     // Configure terminal to allow direct access to key events
-    keyboard_enable_raw ();
+    keyboard_enable_raw();
 #endif
 
     // Play loop
-    for (;;)
-    {
-        if (!player.play ())
+    for (;;) {
+        if (!player.play())
             break;
     }
 
 #ifndef _WIN32
-    keyboard_disable_raw ();
+    keyboard_disable_raw();
 #endif
 
     // Restore default signal error handlers
     if ((signal (SIGINT,  SIG_DFL) == SIG_ERR)
      || (signal (SIGABRT, SIG_DFL) == SIG_ERR)
-     || (signal (SIGTERM, SIG_DFL) == SIG_ERR))
-    {
+     || (signal (SIGTERM, SIG_DFL) == SIG_ERR)) {
         displayError(argv[0], ERR_SIGHANDLER);
         goto main_error;
     }
@@ -90,19 +86,17 @@ main_restart:
     if ((player.state() & ~playerFast) == playerRestart)
         goto main_restart;
 main_exit:
-    player.close ();
+    player.close();
     return EXIT_SUCCESS;
 
 main_error:
-    player.close ();
+    player.close();
     return EXIT_FAILURE;
 }
 
 
-void sighandler (int signum)
-{
-    switch (signum)
-    {
+void sighandler (int signum) {
+    switch (signum) {
     case SIGINT:
     case SIGABRT:
     case SIGTERM:
@@ -113,13 +107,10 @@ void sighandler (int signum)
     }
 }
 
-
-void displayError (const char *arg0, unsigned int num)
-{
+void displayError (const char *arg0, unsigned int num) {
     cerr << arg0 << ": ";
 
-    switch (num)
-    {
+    switch (num) {
     case ERR_SYNTAX:
         cerr << "Command line syntax error," << endl
              << "try `" << arg0 << " --help' for more information." << endl;

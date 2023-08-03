@@ -18,9 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// slightly modified by red M95 ;)
 
 #ifdef HAVE_CONFIG_H
-#  include "config.h"
+# include "config.h"
 #endif
 
 #include "IniConfig.h"
@@ -33,15 +34,15 @@
 #include <cerrno>
 
 #ifndef _WIN32
-#  include <sys/types.h>
-#  include <sys/stat.h>  /* mkdir */
-#  include <dirent.h>    /* opendir */
+# include <sys/types.h>
+# include <sys/stat.h>  /* mkdir */
+# include <dirent.h>    /* opendir */
 #else
-#  include <windows.h>
+# include <windows.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
-#  include <unistd.h>
+# include <unistd.h>
 #endif
 
 #include "utils.h"
@@ -64,9 +65,9 @@ inline void error(const TCHAR *msg, const TCHAR *val) {
 }
 
 const TCHAR *DIR_NAME = TEXT("sidplayfp");
-const TCHAR *FILE_NAME = TEXT("sidplayfp.ini");
+const TCHAR *FILE_NAME = TEXT("config");
 
-IniConfig::IniConfig() { // Initialise everything else
+IniConfig::IniConfig() { // Initialize everything else
     clear();
 }
 
@@ -75,14 +76,14 @@ IniConfig::~IniConfig() {
 }
 
 void IniConfig::clear() {
-    sidplay2_s.version             = 1;                    // INI File Version
-    sidplay2_s.playLength          = 0;                    // INFINITE
-    sidplay2_s.recordLength        = (3 * 60 + 30) * 1000; // 3.5 minutes
-    sidplay2_s.verboseLevel        = 0;
-    sidplay2_s.database.clear();
-    sidplay2_s.kernalRom.clear();
-    sidplay2_s.basicRom.clear();
-    sidplay2_s.chargenRom.clear();
+    sidplayfp_s.version             = 2;               // config file version
+    sidplayfp_s.playLength          = 0;               // infinite play time!
+    sidplayfp_s.recordLength        = (5 * 60) * 1000; // 5 minutes, i mean, why not xd
+    sidplayfp_s.verboseLevel        = 0;
+    sidplayfp_s.database.clear();
+    sidplayfp_s.kernalRom.clear();
+    sidplayfp_s.basicRom.clear();
+    sidplayfp_s.chargenRom.clear();
 
     console_s.ansi          = false;
     console_s.topLeft       = '+';
@@ -188,19 +189,18 @@ void readChar(iniHandler &ini, const TCHAR *key, char &ch) {
 
     TCHAR c = 0;
 
-    // Check if we have an actual chanracter
+    // Check if we have an actual character
     if (str[0] == '\'') {
         if (str[2] != '\'')
             return;
         else
             c = str[1];
-    } // Nope is number
+    } // Nope, it's a number!
     else {
         try {
             c = dataParser::parseInt(str.c_str());
         }
-        catch (dataParser::parseError const &e)
-        {
+        catch (dataParser::parseError const &e) {
             error(TEXT("Error parsing int at "), key);
         }
     }
@@ -220,7 +220,7 @@ bool readTime(iniHandler &ini, const TCHAR *key, int &value) {
     const size_t sep = str.find_first_of(':');
     const size_t dot = str.find_first_of('.');
     try {
-        if (sep == SID_STRING::npos) { // User gave seconds
+        if (sep == SID_STRING::npos) { // User gave seconds only?
             time = dataParser::parseInt(str.c_str());
         }
         else { // Read in MM:SS.mmm format
@@ -263,72 +263,70 @@ IniCofig_readTime_error:
     return false;
 }
 
-void IniConfig::readSidplay2(iniHandler &ini) {
-    if (!ini.setSection(TEXT("SIDPlayfp")))
-        ini.addSection(TEXT("SIDPlayfp"));
+void IniConfig::readSidplayfp(iniHandler &ini) {
+    if (!ini.setSection(TEXT("SIDPlayFP")))
+        ini.addSection(TEXT("SIDPlayFP"));
 
-    int version = sidplay2_s.version;
+    int version = sidplayfp_s.version;
     readInt(ini, TEXT("Version"), version);
     if (version > 0)
-        sidplay2_s.version = version;
+        sidplayfp_s.version = version;
 
-    sidplay2_s.database = readString(ini, TEXT("Songlength Database"));
+    sidplayfp_s.database = readString(ini, TEXT("Songlength DB path"));
 
 #if !defined _WIN32 && defined HAVE_UNISTD_H
-    if (sidplay2_s.database.empty()) {
+    if (sidplayfp_s.database.empty()) {
         char buffer[PATH_MAX];
         snprintf(buffer, PATH_MAX, "%sSonglengths.txt", PKGDATADIR);
         if (::access(buffer, R_OK) == 0)
-            sidplay2_s.database.assign(buffer);
+            sidplayfp_s.database.assign(buffer);
     }
 #endif
     int time;
-    if (readTime(ini, TEXT("Default Play Length"), time))
-        sidplay2_s.playLength = time;
-    if (readTime(ini, TEXT("Default Record Length"), time))
-        sidplay2_s.recordLength = time;
+    if (readTime(ini, TEXT("Play length"), time))
+        sidplayfp_s.playLength = time;
+    if (readTime(ini, TEXT("Record length"), time))
+        sidplayfp_s.recordLength = time;
 
-    sidplay2_s.kernalRom = readString(ini, TEXT("Kernal Rom"));
-    sidplay2_s.basicRom = readString(ini, TEXT("Basic Rom"));
-    sidplay2_s.chargenRom = readString(ini, TEXT("Chargen Rom"));
+    sidplayfp_s.kernalRom  = readString(ini, TEXT("Kernal ROM"));
+    sidplayfp_s.basicRom   = readString(ini, TEXT("BASIC ROM"));
+    sidplayfp_s.chargenRom = readString(ini, TEXT("Chargen ROM"));
 
-    readInt(ini, TEXT("VerboseLevel"), sidplay2_s.verboseLevel);
+    readInt(ini, TEXT("Verbosity level"), sidplayfp_s.verboseLevel);
 }
 
 void IniConfig::readConsole(iniHandler &ini) {
     if (!ini.setSection (TEXT("Console")))
         ini.addSection(TEXT("Console"));
 
-    readBool  (ini, TEXT("Ansi"),                console_s.ansi);
-    readChar  (ini, TEXT("Char Top Left"),       console_s.topLeft);
-    readChar  (ini, TEXT("Char Top Right"),      console_s.topRight);
-    readChar  (ini, TEXT("Char Bottom Left"),    console_s.bottomLeft);
-    readChar  (ini, TEXT("Char Bottom Right"),   console_s.bottomRight);
-    readChar  (ini, TEXT("Char Vertical"),       console_s.vertical);
-    readChar  (ini, TEXT("Char Horizontal"),     console_s.horizontal);
-    readChar  (ini, TEXT("Char Junction Left"),  console_s.junctionLeft);
-    readChar  (ini, TEXT("Char Junction Right"), console_s.junctionRight);
+    readBool(ini, TEXT("ANSI"), console_s.ansi);
+    readChar(ini, TEXT("Top left char"), console_s.topLeft);
+    readChar(ini, TEXT("Top right char"), console_s.topRight);
+    readChar(ini, TEXT("Bottom left char"), console_s.bottomLeft);
+    readChar(ini, TEXT("Bottom right char"), console_s.bottomRight);
+    readChar(ini, TEXT("Vertical char"), console_s.vertical);
+    readChar(ini, TEXT("Horizontal char"), console_s.horizontal);
+    readChar(ini, TEXT("Junction left char"), console_s.junctionLeft);
+    readChar(ini, TEXT("Junction right char"), console_s.junctionRight);
 }
 
 void IniConfig::readAudio(iniHandler &ini) {
     if (!ini.setSection (TEXT("Audio")))
         ini.addSection(TEXT("Audio"));
 
-    readInt(ini, TEXT("Frequency"), audio_s.frequency);
-
-    readInt(ini, TEXT("Channels"),  audio_s.channels);
-
-    readInt(ini, TEXT("BitsPerSample"), audio_s.precision);
+    readInt(ini, TEXT("Sample rate"), audio_s.frequency);
+    readInt(ini, TEXT("Channels"), audio_s.channels);
+    readInt(ini, TEXT("Bit depth"), audio_s.precision);
 }
 
 void IniConfig::readEmulation(iniHandler &ini) {
     if (!ini.setSection (TEXT("Emulation")))
         ini.addSection(TEXT("Emulation"));
 
-    emulation_s.engine = readString (ini, TEXT("Engine"));
+    emulation_s.engine = readString(ini, TEXT("Engine"));
 
     {
-        SID_STRING str = readString (ini, TEXT("C64Model"));
+        SID_STRING str = readString(ini, TEXT("C64 model"));
         if (!str.empty()) {
             if (str.compare(TEXT("PAL")) == 0)
                 emulation_s.modelDefault = SidConfig::PAL;
@@ -340,11 +338,11 @@ void IniConfig::readEmulation(iniHandler &ini) {
                 emulation_s.modelDefault = SidConfig::DREAN;
         }
     }
-    readBool(ini, TEXT("ForceC64Model"), emulation_s.modelForced);
+    readBool(ini, TEXT("Force C64 model"), emulation_s.modelForced);
     readBool(ini, TEXT("DigiBoost"), emulation_s.digiboost);
 #ifdef FEAT_CONFIG_CIAMODEL
     {
-        SID_STRING str = readString(ini, TEXT("CiaModel"));
+        SID_STRING str = readString(ini, TEXT("CIA model"));
         if (!str.empty()) {
             if (str.compare(TEXT("MOS6526")) == 0)
                 emulation_s.ciaModel = SidConfig::MOS6526;
@@ -354,7 +352,7 @@ void IniConfig::readEmulation(iniHandler &ini) {
     }
 #endif
     {
-        SID_STRING str = readString(ini, TEXT("SidModel"));
+        SID_STRING str = readString(ini, TEXT("SID model"));
         if (!str.empty()) {
             if (str.compare(TEXT("MOS6581")) == 0)
                 emulation_s.sidModel = SidConfig::MOS6581;
@@ -362,15 +360,15 @@ void IniConfig::readEmulation(iniHandler &ini) {
                 emulation_s.sidModel = SidConfig::MOS8580;
         }
     }
-    readBool(ini, TEXT("ForceSidModel"), emulation_s.forceModel);
+    readBool(ini, TEXT("Force SID model"), emulation_s.forceModel);
 
-    readBool(ini, TEXT("UseFilter"), emulation_s.filter);
+    readBool(ini, TEXT("Filter"), emulation_s.filter);
 
-    readDouble(ini, TEXT("FilterBias"), emulation_s.bias);
-    readDouble(ini, TEXT("FilterCurve6581"), emulation_s.filterCurve6581);
-    readDouble(ini, TEXT("FilterCurve8580"), emulation_s.filterCurve8580);
+    readDouble(ini, TEXT("Filter bias"), emulation_s.bias);
+    readDouble(ini, TEXT("6581 filter curve"), emulation_s.filterCurve6581);
+    readDouble(ini, TEXT("8580 filter curve"), emulation_s.filterCurve8580);
 
-    readInt(ini, TEXT("PowerOnDelay"), emulation_s.powerOnDelay);
+    readInt(ini, TEXT("Power-on delay"), emulation_s.powerOnDelay);
     {
         SID_STRING str = readString(ini, TEXT("Sampling"));
         if (!str.empty()) {
@@ -380,7 +378,7 @@ void IniConfig::readEmulation(iniHandler &ini) {
                 emulation_s.samplingMethod = SidConfig::RESAMPLE_INTERPOLATE;
         }
     }
-    readBool(ini, TEXT("ResidFastSampling"), emulation_s.fastSampling);
+    readBool(ini, TEXT("Fast resampling"), emulation_s.fastSampling);
 }
 
 class iniError {
@@ -396,7 +394,7 @@ void createDir(const SID_STRING& path) {
 #ifndef _WIN32
 	DIR *dir = opendir(path.c_str());
     if (dir) {
-		closedir(dir);
+        closedir(dir);
 	}
 	else if (errno == ENOENT) {
         if (mkdir(path.c_str(), 0755) < 0) {
@@ -411,7 +409,7 @@ void createDir(const SID_STRING& path) {
         if (CreateDirectory(path.c_str(), NULL) == 0) {
             LPTSTR pBuffer;
             FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
-                NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pBuffer, 0, NULL);
+                         NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&pBuffer, 0, NULL);
             iniError err(pBuffer);
             LocalFree(pBuffer);
             throw err;
@@ -449,8 +447,7 @@ SID_STRING getConfigPath() {
 
 bool tryOpen(MAYBE_UNUSED iniHandler &ini) {
 #ifdef _WIN32
-    {
-        // Try exec dir first
+    { // Try exec dir first
         SID_STRING execPath(utils::getExecPath());
         execPath.append(SEPARATOR).append(FILE_NAME);
         if (ini.tryOpen(execPath.c_str()))
@@ -479,10 +476,10 @@ void IniConfig::read() {
             return;
         }
     }
-    readSidplay2  (ini);
-    readConsole   (ini);
-    readAudio     (ini);
-    readEmulation (ini);
+    readSidplayfp(ini);
+    readConsole  (ini);
+    readAudio    (ini);
+    readEmulation(ini);
 
     m_fileName = ini.getFilename();
 

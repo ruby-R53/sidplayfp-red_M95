@@ -26,15 +26,15 @@
 
 #ifndef _WIN32
 // Unix console headers
-#  include <ctype.h>
+# include <ctype.h>
 // bzero requires memset on some platforms
-#  include <string.h>
-#  include <termios.h>
-#  include <sys/time.h>
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#  include <fcntl.h>
-#  include <unistd.h>
+# include <string.h>
+# include <termios.h>
+# include <sys/time.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <unistd.h>
 int _getch (void);
 #endif
 
@@ -88,7 +88,7 @@ static char keytable[] = {
     '7',0,                     A_TOGGLE_VOICE7,
     '8',0,                     A_TOGGLE_VOICE8,
     '9',0,                     A_TOGGLE_VOICE9,
-    //'m',0,                     A_TOGGLE_MASTER,
+//  'm',0,                     A_TOGGLE_MASTER,
     'f',0,                     A_TOGGLE_FILTER,
 
     // General Keys
@@ -96,7 +96,7 @@ static char keytable[] = {
     'k',0,                     A_PAUSED,
     ESC,ESC,0,                 A_QUIT,
     'q',0,                     A_QUIT,
-    's',0,                     A_SEARCH,
+    'g',0,                     A_GOTO,
     'r',0,                     A_REPLAY,
 
     // Old Keys
@@ -113,7 +113,7 @@ static char keytable[] = {
 /*
  * Search a single command table for the command string in cmd.
  */
-static int keyboard_search (char *cmd) {
+static int keyboard_search(char *cmd) {
     char *p;
     char *q;
     int   a;
@@ -178,7 +178,7 @@ static int keyboard_search (char *cmd) {
     return (A_INVALID);
 }
 
-int keyboard_decode () {
+int keyboard_decode() {
     char cmd[MAX_CMDLEN+1];
     int  nch = 0;
     int  action = A_NONE;
@@ -192,20 +192,20 @@ int keyboard_decode () {
         c = '\340'; // 224
     else if (c == ESC) {
         cmd[nch++] = c;
-        if (_kbhit ())
-            c = _getch ();
+        if (_kbhit())
+            c = _getch();
     }
 
     while (c >= 0) {
         cmd[nch++] = c;
         cmd[nch]   = '\0';
-        action     = keyboard_search (cmd);
+        action     = keyboard_search(cmd);
 
         if (action != A_PREFIX)
             break;
-        if (!_kbhit ())
+        if (!_kbhit())
             break;
-        c = _getch ();
+        c = _getch();
     }
     return action;
 }
@@ -215,32 +215,32 @@ int keyboard_decode () {
 
 static int infd = -1;
 
-int _kbhit (void) {
+int _kbhit(void) {
     if (infd >= 0) { // Set no delay
         static struct timeval tv = {0, 0};
         fd_set rdfs;
 
         // See if key has been pressed
-        FD_ZERO (&rdfs);
-        FD_SET  (infd, &rdfs);
-        if (select  (infd + 1, &rdfs, nullptr, nullptr, &tv) <= 0)
+        FD_ZERO(&rdfs);
+        FD_SET (infd, &rdfs);
+        if (select(infd + 1, &rdfs, nullptr, nullptr, &tv) <= 0)
             return 0;
-        if (FD_ISSET (infd, &rdfs))
+        if (FD_ISSET(infd, &rdfs))
             return 1;
     }
     return 0;
 }
 
-int _getch (void) {
+int _getch(void) {
     char ch = -1;
     if (infd >= 0)
-        read (infd, &ch, 1);
+        read(infd, &ch, 1);
     return ch;
 }
 
 // Set keyboard to raw mode so getch will work
 static termios term;
-void keyboard_enable_raw () {
+void keyboard_enable_raw() {
     // set to non canonical mode, echo off, ignore signals
     struct termios current;
 
@@ -267,18 +267,18 @@ void keyboard_enable_raw () {
     current.c_lflag &= ~(ECHO | ICANON | IEXTEN);
     current.c_cc[VMIN] = 1;
     current.c_cc[VTIME] = 0;
-    tcsetattr (infd, TCSAFLUSH, &current);
+    tcsetattr(infd, TCSAFLUSH, &current);
 }
 
-void keyboard_disable_raw () {
-    if (infd >= 0) {   // Restore old terminal settings
-        tcsetattr (infd, TCSAFLUSH, &term);
+void keyboard_disable_raw() {
+    if (infd >= 0) { // Restore old terminal settings
+        tcsetattr(infd, TCSAFLUSH, &term);
         switch (infd) {
         case STDIN_FILENO:
         case STDERR_FILENO:
             break;
         default:
-            close (infd);
+            close(infd);
         }
         infd = -1;
     }

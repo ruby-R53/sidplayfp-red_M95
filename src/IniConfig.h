@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+// to be modified by red M95 ;)
 
 #ifndef INICONFIG_H
 #define INICONFIG_H
@@ -33,11 +34,9 @@
 /*
  * Sidplayfp config file reader.
  */
-class IniConfig
-{
+class IniConfig {
 public:
-    struct sidplay2_section
-    {
+    struct sidplayfp_section {
         int            version;
         SID_STRING     database;
         uint_least32_t playLength;
@@ -48,76 +47,73 @@ public:
         int            verboseLevel;
     };
 
-    struct console_section
-    {   // INI Section - [Console]
-        bool       ansi;
-        char       topLeft;
-        char       topRight;
-        char       bottomLeft;
-        char       bottomRight;
-        char       vertical;
-        char       horizontal;
-        char       junctionLeft;
-        char       junctionRight;
+    struct console_section { // [Console] section
+        bool ansi;
+        char topLeft;
+        char topRight;
+        char bottomLeft;
+        char bottomRight;
+        char vertical;
+        char horizontal;
+        char junctionLeft;
+        char junctionRight;
     };
 
-    struct audio_section
-    {   // INI Section - [Audio]
+    struct audio_section { // [Audio] section
         int frequency;
         int channels;
         int precision;
     };
 
-    struct emulation_section
-    {   // INI Section - [Emulation]
-        SID_STRING    engine;
-        SidConfig::c64_model_t  modelDefault;
-        bool          modelForced;
-        SidConfig::sid_model_t  sidModel;
-        bool          forceModel;
+    struct emulation_section { // [Emulation] section
+        SID_STRING             engine;
+        SidConfig::c64_model_t modelDefault;
+        bool                   modelForced;
+        SidConfig::sid_model_t sidModel;
+        bool                   forceModel;
 #ifdef FEAT_CONFIG_CIAMODEL
-        SidConfig::cia_model_t  ciaModel;
+        SidConfig::cia_model_t ciaModel;
 #endif
-        bool          digiboost;
-        bool          filter;
-        double        bias;
-        double        filterCurve6581;
-        double        filterCurve8580;
-        int           powerOnDelay;
-        SidConfig::sampling_method_t  samplingMethod;
-        bool          fastSampling;
+        bool                         digiboost;
+        bool                         filter;
+        double                       bias;
+        double                       filterCurve6581;
+        double                       filterCurve8580;
+        int                          powerOnDelay;
+        SidConfig::sampling_method_t samplingMethod;
+        bool                         fastSampling;
     };
 
 protected:
-    struct    sidplay2_section  sidplay2_s;
-    struct    console_section   console_s;
-    struct    audio_section     audio_s;
-    struct    emulation_section emulation_s;
+    struct sidplayfp_section sidplayfp_s;
+    struct console_section   console_s;
+    struct audio_section     audio_s;
+    struct emulation_section emulation_s;
 
 protected:
-    void  clear ();
+    void clear();
 
-    void readSidplay2  (iniHandler &ini);
-    void readConsole   (iniHandler &ini);
-    void readAudio     (iniHandler &ini);
-    void readEmulation (iniHandler &ini);
+    void readSidplayfp(iniHandler &ini);
+    void readConsole  (iniHandler &ini);
+    void readAudio    (iniHandler &ini);
+    void readEmulation(iniHandler &ini);
 
 private:
     SID_STRING m_fileName;
 
 public:
-    IniConfig  ();
-    ~IniConfig ();
+    IniConfig ();
+    ~IniConfig();
 
     SID_STRING getFilename() const { return m_fileName; }
 
-    void read ();
+    void read();
 
     // Sidplayfp Specific Section
-    const sidplay2_section&  sidplay2  () { return sidplay2_s; }
-    const console_section&   console   () { return console_s; }
-    const audio_section&     audio     () { return audio_s; }
-    const emulation_section& emulation () { return emulation_s; }
+    const sidplayfp_section& sidplayfp() { return sidplayfp_s; }
+    const console_section&   console  () { return console_s; }
+    const audio_section&     audio    () { return audio_s; }
+    const emulation_section& emulation() { return emulation_s; }
 };
 
 #endif // INICONFIG_H

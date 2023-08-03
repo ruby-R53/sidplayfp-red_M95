@@ -1,11 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([sidplayfp-red_M95], [2.5.0a2], [], [], [https://github.com/red-M95/sidplayfp-red_M95/])
+AC_INIT([sidplayfp-red_M95], [2-2.5.0], [], [], [https://github.com/red-M95/sidplayfp-red_M95/])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE
-
 
 
 AC_CANONICAL_HOST
@@ -18,7 +17,6 @@ case "$host" in
         ;;
 esac
 AM_CONDITIONAL([MINGW32], [test "x$MINGW32" = "xyes"])
-
 
 AC_PROG_RANLIB
 
@@ -57,7 +55,6 @@ PKG_CHECK_MODULES(PULSE,
     [AC_DEFINE([HAVE_PULSE], 1, [Define to 1 if you have libpulse-simple (-lpulse-simple).])],
     [AC_MSG_WARN([$PULSE_PKG_ERRORS])]
 )
-
 
 dnl Checks what version of Unix we have and soundcard support
 AC_CHECK_HEADERS([sys/ioctl.h linux/soundcard.h machine/soundcard.h \
